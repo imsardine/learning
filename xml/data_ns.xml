@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data xmlns="http://x.y.z/ns" xmlns:a="http://x.y.z/ns/a" attr="value">
+  <fruits>
+    <fruit name="Apple" a:name="Apple (a)">
+       <color>Red</color>
+       <a:color>Red (a)</a:color>
+    </fruit>
+  </fruits>
+</data>
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <!-- Profile -->
+  <students>
+    <student id="J001" name="Judy" lang="中文">
+      <weight>34</weight>
+      <height>149</height>
+      <cname>茱蒂</cname>
+    </student>
+    <student id="S001" name="Jeremy" lang="English">
+      <weight>65</weight>
+      <height>178</height>
+      <cname>Jeremy Kao</cname>
+    </student>
+  </students>
+  <teachers>
+  </teachers>
+</data>
+
