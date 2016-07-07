@@ -5,6 +5,10 @@ protocol Vehicle {
 }
 
 extension Vehicle {
+
+    // error: extensions may not contain stored properties
+    // var somethingElse: String?
+
     var description: String {
         return "A vehicle with \(numberOfWheels) wheel(s)."
     }
