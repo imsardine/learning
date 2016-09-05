@@ -1,0 +1,3 @@
+{
+    "plugins" : [ "bootstrap-callout@0.1.1", "callouts@0.1.1" ]
+}
