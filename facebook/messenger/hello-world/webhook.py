@@ -22,9 +22,16 @@ def webhook():
     if data['object'] == 'page':
         for entry in data['entry']:
             for event in entry['messaging']:
-                if 'message' not in event:
+                timestamp = event['timestamp']
+                sender_id = event['sender']['id']
+                recipient_id = event['recipient']['id']
+
+                if 'message' in event:
+                    on_message_event(timestamp, sender_id, event['message'])
+                elif 'postback' in event:
+                    on_postback_event(timestamp, sender_id, event['postback'])
+                else:
                     abort(400) # Unknown event
-                on_message_event(event)
     else:
         abort(400) # Bad Request
 
@@ -40,14 +47,7 @@ def verify_webhook(mode, verify_token):
     elif hub_mode == 'subscribe':
         return query_params['hub.challenge']
 
-def on_message_event(event):
-    app.logger.info('Message data: %s', event)
-
-    timestamp = event['timestamp']
-    sender_id = event['sender']['id']
-    recipient_id = event['recipient']['id']
-    message = event['message']
-
+def on_message_event(timestamp, sender_id, message):
     if 'text' in message:
         handle_text_message(sender_id, message['text'])
     elif 'attachments' in message:
@@ -55,20 +55,78 @@ def on_message_event(event):
     else:
         abort(400)
 
-def handle_text_message(sender_id, message):
-    params = {'access_token': PAGE_ACCESS_TOKEN}
+def on_postback_event(timestamp, sender_id, postback):
+    payload = postback['payload']
+    send_text(sender_id, 'Thanks for selecting %s' % payload)
 
+def send_text(recipient_id, text):
+    send_message(recipient_id, {'text': text})
+
+def send_message(recipient_id, message):
+    params = {'access_token': PAGE_ACCESS_TOKEN}
     data = {
         'recipient': {
-            'id': sender_id
+            'id': recipient_id
         },
-        'message': {
-            'text': message
-        }
+        'message': message,
     }
 
     resp = requests.post(SEND_API, params=params, json=data)
     app.logger.info('Message posted: message = %s, response = %s', data, resp.json())
+
+def handle_text_message(sender_id, text):
+    if text == 'generic':
+        send_message(sender_id, demo_generic_template(sender_id, text))
+    else:
+        send_text(sender_id, text)
+
+def demo_generic_template(sender_id, message):
+    return {
+        'attachment': {
+            'type': 'template', # structured message
+            'payload': {
+                'template_type': 'generic',
+                'elements': [
+                    {
+                        'title': 'rift',
+                        'subtitle': 'Next-generation virtual reality',
+                        'item_url': 'https://www.oculus.com/en-us/rift/',
+                        'image_url': 'http://messengerdemo.parseapp.com/img/rift.png',
+                        'buttons': [
+                            {
+                                'type': 'web_url',
+                                'url': 'https://www.oculus.com/en-us/rift/',
+                                'title': 'Open Web URL',
+                            },
+                            {
+                                'type': 'postback',
+                                'title': 'Call Postback',
+                                'payload': 'Payload for first bubble'
+                            }
+                        ],
+                    },
+                    {
+                        'title': 'touch',
+                        'subtitle': 'Your Hands, Now in VR',
+                        'item_url': 'https://www.oculus.com/en-us/touch/',
+                        'image_url': 'http://messengerdemo.parseapp.com/img/touch.png',
+                        'buttons': [
+                            {
+                                'type': 'web_url',
+                                'url': 'https://www.oculus.com/en-us/touch/',
+                                'title': 'Open Web URL',
+                            },
+                            {
+                                'type': 'postback',
+                                'title': 'Call Postback',
+                                'payload': 'Payload for second bubble'
+                            }
+                        ],
+                    },
+                ],
+            }
+        }
+    }
 
 if __name__ == '__main__':
     app.run()
