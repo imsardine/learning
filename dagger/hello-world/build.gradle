@@ -1,0 +1,14 @@
+apply plugin: 'application'
+
+mainClassName = 'Main'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'com.google.dagger:dagger:2.9'
+    compileOnly 'com.google.dagger:dagger-compiler:2.9'
+    testCompile 'junit:junit:4.12'
+}
+
