@@ -1,0 +1,16 @@
+apply plugin: 'application'
+apply plugin: 'jacoco'
+
+mainClassName = 'Main'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'com.google.dagger:dagger:2.9'
+    compileOnly 'com.google.dagger:dagger-compiler:2.9'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.7.5'
+}
+
