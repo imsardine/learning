@@ -1,4 +1,4 @@
-package io.github.imsardine.learning.java;
+package sdk.java.util;
 
 import org.junit.Test;
 import org.junit.Before;

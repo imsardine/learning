@@ -1,9 +1,7 @@
-package io.github.imsardine.learning.java;
-
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class DayOfWeekTest {
+public class EnumsTest {
 
     @Test
     public void enumTypesImplicitlyExtendsEnum() {

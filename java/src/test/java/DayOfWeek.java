@@ -1,5 +1,3 @@
-package io.github.imsardine.learning.java;
-
 public enum DayOfWeek {
     MONDAY    (false),
     TUESDAY   (false),
