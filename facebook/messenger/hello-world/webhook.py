@@ -75,7 +75,9 @@ def send_message(recipient_id, message):
     app.logger.info('Message posted: message = %s, response = %s', data, resp.json())
 
 def handle_text_message(sender_id, text):
-    if text == 'generic':
+    if u'吃什麼' in text:
+        send_text(sender_id, u'Judy 爸爸說：不知道')
+    elif text == 'generic':
         send_message(sender_id, demo_generic_template(sender_id, text))
     else:
         send_text(sender_id, text)

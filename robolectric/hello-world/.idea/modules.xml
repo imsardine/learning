@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file:///private/tmp/myapp/app/app.iml" filepath="/private/tmp/myapp/app/app.iml" />
+      <module fileurl="file:///private/tmp/myapp/myapp.iml" filepath="/private/tmp/myapp/myapp.iml" />
+    </modules>
+  </component>
+</project>
