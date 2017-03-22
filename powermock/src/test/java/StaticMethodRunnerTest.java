@@ -13,13 +13,23 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 public class StaticMethodRunnerTest {
 
     @Test
-    public void mockStaticMethods() {
+    public void mockWrapperClass() {
         PowerMockito.mockStatic(Time.class);
-        when(Time.now()).thenReturn(123L);
+        when(Time.now(any(String.class))).thenReturn(123L);
 
-        assertEquals(123L, Time.now());
+        assertEquals(123L, Time.now("mockWrapperClass"));
 
-        PowerMockito.verifyStatic(); Time.now();
+        PowerMockito.verifyStatic(); Time.now("mockWrapperClass");
+    }
+
+    @Test
+    public void mockSystemClass() {
+        PowerMockito.mockStatic(System.class);
+        when(System.currentTimeMillis()).thenReturn(456L);
+
+        assertEquals(456L, Time.now("mockSystemClass"));
+
+        PowerMockito.verifyStatic(); System.currentTimeMillis();
     }
 
 }

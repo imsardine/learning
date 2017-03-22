@@ -17,13 +17,25 @@ public class StaticMethodRuleTest {
     public PowerMockRule powerMockRule = new PowerMockRule();
 
     @Test
-    public void mockStaticMethods() {
+    public void mockWrapperClass() {
         PowerMockito.mockStatic(Time.class);
-        when(Time.now()).thenReturn(456L);
+        when(Time.now(any(String.class))).thenReturn(123L);
 
-        assertEquals(456L, Time.now());
+        assertEquals(123L, Time.now("mockWrapperClass"));
 
-        PowerMockito.verifyStatic(); Time.now();
+        PowerMockito.verifyStatic(); Time.now("mockWrapperClass");
+    }
+
+    @Test
+    public void mockSystemClass() {
+        // While prepare the wrapper class (Time), mock the underlying system
+        // class (System).
+        PowerMockito.mockStatic(System.class);
+        when(System.currentTimeMillis()).thenReturn(456L);
+
+        assertEquals(456L, Time.now("mockSystemClass"));
+
+        PowerMockito.verifyStatic(); System.currentTimeMillis();
     }
 
 }
