@@ -1,14 +1,14 @@
+import org.junit.Rule;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.rule.PowerMockRule;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import org.powermock.modules.junit4.PowerMockRunner;
-import static org.mockito.Mockito.*;
-import org.junit.runner.RunWith;
-import org.junit.Rule;
-import org.powermock.modules.junit4.rule.PowerMockRule;
 
 @PrepareForTest(Time.class)
 public class StaticMethodRuleTest {
