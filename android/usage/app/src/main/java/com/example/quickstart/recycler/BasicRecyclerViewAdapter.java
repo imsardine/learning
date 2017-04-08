@@ -16,7 +16,7 @@ import java.util.List;
 public class BasicRecyclerViewAdapter extends RecyclerView.Adapter<BasicRecyclerViewAdapter.ViewHolder> {
 
     public interface ItemClickListener {
-        void onItemClicked(int position);
+        void onItemClicked(int position, String id);
     }
 
     private LayoutInflater inflater;
@@ -65,7 +65,8 @@ public class BasicRecyclerViewAdapter extends RecyclerView.Adapter<BasicRecycler
         @Override
         public void onClick(View v) {
             if (listener != null) {
-                listener.onItemClicked(getAdapterPosition());
+                int position = getAdapterPosition();
+                listener.onItemClicked(position, items.get(position).id);
             }
         }
     }

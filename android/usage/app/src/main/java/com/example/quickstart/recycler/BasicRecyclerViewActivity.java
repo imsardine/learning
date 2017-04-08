@@ -18,6 +18,8 @@ public class BasicRecyclerViewActivity extends AppCompatActivity implements Basi
 
     private Presenter presenter;
 
+    private List<PresentationModel> items;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,19 +36,21 @@ public class BasicRecyclerViewActivity extends AppCompatActivity implements Basi
     }
 
     @Override
-    public void onItemClicked(int position) {
-        presenter.hit(position);
+    public void onItemClicked(int position, String id) {
+        presenter.hit(position, id);
     }
 
     private class MvpView implements BasicRecyclerViewContract.View {
 
         @Override
         public void showData(List<PresentationModel> items) {
-            adapter.setData(items);
+            adapter.setData(BasicRecyclerViewActivity.this.items = items);
         }
 
         @Override
-        public void updateItem(int position) {
+        public void updateHits(int position, int hits) {
+            items.get(position).hits = hits;
+            // or adapter.updateHits(position, hits), so the view don't have to manipulate data.
             adapter.notifyItemChanged(position);
         }
 
