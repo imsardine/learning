@@ -5,6 +5,7 @@ import com.example.quickstart.recycler.BasicRecyclerViewContract.PresentationMod
 import com.example.quickstart.recycler.BasicRecyclerViewContract.Presenter;
 import com.example.quickstart.recycler.BasicRecyclerViewContract.View;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,15 +20,27 @@ public class BasicRecyclerViewPresenter implements Presenter {
 
     private View view;
 
-    private Map<String, Integer> itemHits = new HashMap<>(); // ID : hits
+    private HashMap<String, Integer> itemHits = new HashMap<>(); // ID : hits
 
     public BasicRecyclerViewPresenter(View view) {
         this.view = view;
     }
 
     @Override
-    public void init() {
+    public void init(Map<String, Serializable> state) {
+        if (state != null) {
+            itemHits = (HashMap) state.get(STATE_HITS);
+        }
+
         view.showData(transformModel());
+    }
+
+    @Override
+    public Map<String, Serializable> prepareState() {
+        Map<String, Serializable> state = new HashMap<>();
+        state.put(STATE_HITS, itemHits);
+
+        return state;
     }
 
     private List<PresentationModel> transformModel() {
@@ -35,9 +48,11 @@ public class BasicRecyclerViewPresenter implements Presenter {
 
         for (BusinessItem item : BUSINESS_ITEMS) {
             PresentationModel presentation = new PresentationModel();
-            presentation.id = item.getID();
+
+            String id = item.getID();
+            presentation.id = id;
             presentation.name = item.getName();
-            presentation.hits = 0;
+            presentation.hits = itemHits.containsKey(id) ? itemHits.get(id) : 0;
 
             output.add(presentation);
         }

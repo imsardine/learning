@@ -10,7 +10,11 @@ import com.example.quickstart.R;
 import com.example.quickstart.recycler.BasicRecyclerViewContract.PresentationModel;
 import com.example.quickstart.recycler.BasicRecyclerViewContract.Presenter;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class BasicRecyclerViewActivity extends AppCompatActivity implements BasicRecyclerViewAdapter.ItemClickListener {
 
@@ -32,7 +36,25 @@ public class BasicRecyclerViewActivity extends AppCompatActivity implements Basi
         // recycler.setLayoutManager(new LinearLayoutManager(this));
 
         presenter = new BasicRecyclerViewPresenter(new MvpView());
-        presenter.init();
+
+        Map<String, Serializable> state = null;
+        if (savedInstanceState != null) {
+            state = new HashMap<>();
+            for (String key : Presenter.STATE_KEYS) {
+                state.put(key, savedInstanceState.getSerializable(key));
+            }
+        }
+
+        presenter.init(state);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        for (Entry<String, Serializable> entry : presenter.prepareState().entrySet()) {
+            outState.putSerializable(entry.getKey(), entry.getValue());
+        }
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override
