@@ -1,14 +1,13 @@
-package com.example.quickstart.recycler;
+package com.example.usage.recycler;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
-import com.example.quickstart.R;
-import com.example.quickstart.recycler.BasicRecyclerViewContract.PresentationModel;
-import com.example.quickstart.recycler.BasicRecyclerViewContract.Presenter;
+import com.example.usage.R;
+import com.example.usage.recycler.BasicRecyclerViewContract.PresentationModel;
+import com.example.usage.recycler.BasicRecyclerViewContract.Presenter;
 
 import java.io.Serializable;
 import java.util.HashMap;

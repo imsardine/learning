@@ -1,4 +1,4 @@
-package com.example.quickstart.recycler;
+package com.example.usage.recycler;
 
 import java.io.Serializable;
 import java.util.Arrays;

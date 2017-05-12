@@ -1,4 +1,4 @@
-package com.example.quickstart;
+package com.example.usage;
 
 import org.junit.Test;
 

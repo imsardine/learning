@@ -1,9 +1,9 @@
-package com.example.quickstart.recycler;
+package com.example.usage.recycler;
 
-import com.example.quickstart.BusinessItem;
-import com.example.quickstart.recycler.BasicRecyclerViewContract.PresentationModel;
-import com.example.quickstart.recycler.BasicRecyclerViewContract.Presenter;
-import com.example.quickstart.recycler.BasicRecyclerViewContract.View;
+import com.example.usage.BusinessItem;
+import com.example.usage.recycler.BasicRecyclerViewContract.PresentationModel;
+import com.example.usage.recycler.BasicRecyclerViewContract.Presenter;
+import com.example.usage.recycler.BasicRecyclerViewContract.View;
 
 import java.io.Serializable;
 import java.util.ArrayList;

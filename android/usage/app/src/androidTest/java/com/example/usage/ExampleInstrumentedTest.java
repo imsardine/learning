@@ -1,4 +1,4 @@
-package com.example.quickstart;
+package com.example.usage;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

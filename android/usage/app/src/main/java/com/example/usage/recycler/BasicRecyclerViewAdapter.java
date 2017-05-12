@@ -1,4 +1,4 @@
-package com.example.quickstart.recycler;
+package com.example.usage.recycler;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,8 +8,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.quickstart.R;
-import com.example.quickstart.recycler.BasicRecyclerViewContract.PresentationModel;
+import com.example.usage.R;
+import com.example.usage.recycler.BasicRecyclerViewContract.PresentationModel;
 
 import java.util.List;
 
