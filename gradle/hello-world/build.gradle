@@ -1,0 +1,18 @@
+defaultTasks 'hello'
+
+task intro {
+    doLast {
+        println 'I am Gradle.'
+    }
+}
+
+task hello(dependsOn: intro) {
+    doLast {
+        println 'Hello, World!'
+    }
+}
+
+hello.doFirst {
+    println 'Hello, Gradle!'
+}
+
