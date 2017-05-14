@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.usage.androidlib.HelloActivity;
 import com.example.usage.recycler.BasicRecyclerViewActivity;
 
 import java.util.Arrays;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void sayHello(View view) { // corresponds to android:onClick="sayHello" in the XML layout.
         EditText input = (EditText) findViewById(R.id.somebody);
-        startActivity(AnotherActivity.prepareIntent(this, input.getText().toString()));
+        startActivity(HelloActivity.prepareIntent(this, input.getText().toString()));
     }
 
 }
