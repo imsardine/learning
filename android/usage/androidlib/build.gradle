@@ -39,9 +39,7 @@ dependencies {
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
-    def includes = ['com/example/usage/**/*.class']
-    def excludes = ['**/R.class', '**/R$*.class', '**/Manifest.class', '**/Manifest$*.class', '**/BuildConfig.class']
     executionData = fileTree(dir: buildDir, includes: ['jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*.ec'])
     sourceDirectories = files('src/main/java')
-    classDirectories = fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: includes, excludes: excludes)
+    classDirectories = fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: COVERAGE_INCLUDES, excludes: COVERAGE_EXCLUDES)
 }

@@ -23,5 +23,8 @@ task clean(type: Delete) {
 }
 
 ext {
+    COVERAGE_INCLUDES = ['com/example/usage/**/*.class']
+    COVERAGE_EXCLUDES = ['**/R.class', '**/R$*.class', '**/Manifest.class', '**/Manifest$*.class', '**/BuildConfig.class']
+
     SUPPORT_LIBRARY_VERSION = '25.1.0'
 }

@@ -38,27 +38,24 @@ dependencies {
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest', ':javalib:jacocoTestReport', ':androidlib:jacocoTestReport']) {
-    def javalibDir = file('../javalib')
-    def androidlibDir = file('../androidlib')
+    def javalibTask = tasks.getByPath(':javalib:jacocoTestReport')
+    def androidlibTask = tasks.getByPath(':androidlib:jacocoTestReport')
 
     executionData = files(
             fileTree(dir: buildDir, includes: ['jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*.ec']),
-            fileTree(dir: "${javalibDir}/build", include: 'jacoco/test.exec'),
-            fileTree(dir: "${androidlibDir}/build", includes: ['jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*.ec'])
+            javalibTask.executionData,
+            androidlibTask.executionData
     )
 
     sourceDirectories = files(
             fileTree(dir: projectDir, include: 'src/main/java'),
-            fileTree(dir: javalibDir, include: 'src/mian/java'),
-            fileTree(dir: androidlibDir, include: 'src/main/java')
+            javalibTask.sourceDirectories,
+            androidlibTask.sourceDirectories
     )
 
-    def includes = ['com/example/usage/**/*.class']
-    def excludes = ['**/R.class', '**/R$*.class', '**/Manifest.class', '**/Manifest$*.class', '**/BuildConfig.class']
-
     classDirectories = files(
-            fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: includes, excludes: excludes),
-            file("${javalibDir}/build/classes/main"),
-            fileTree(dir: "${androidlibDir}/build/intermediates/classes/debug", includes: includes, excludes: excludes)
+            fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: COVERAGE_INCLUDES, excludes: COVERAGE_EXCLUDES),
+            javalibTask.classDirectories,
+            androidlibTask.classDirectories
     )
 }
