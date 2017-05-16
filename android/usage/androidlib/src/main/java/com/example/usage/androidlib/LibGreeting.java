@@ -1,14 +1,17 @@
 package com.example.usage.androidlib;
 
+import com.example.usage.Greeting;
+
 public class LibGreeting {
 
-    public String hello(String somebody) {
-        // who = (somebody == null || "".equals(somebody)) ? "World" : who;
-        if (somebody == null || "".equals(somebody)) {
-            somebody = "World";
-        }
+    private Greeting delegate;
 
-        return String.format("[AndroidLib] Hello, %1$s!", somebody);
+    public LibGreeting() {
+        delegate = new Greeting();
+    }
+
+    public String hello(String somebody) {
+        return "[AndroidLib] " + delegate.hello(somebody);
     }
 
 }

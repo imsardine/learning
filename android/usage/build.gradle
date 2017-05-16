@@ -1,4 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+apply plugin: 'jacoco'
 
 buildscript {
     repositories {
@@ -27,4 +28,28 @@ ext {
     COVERAGE_EXCLUDES = ['**/R.class', '**/R$*.class', '**/Manifest.class', '**/Manifest$*.class', '**/BuildConfig.class']
 
     SUPPORT_LIBRARY_VERSION = '25.1.0'
+}
+
+task jacocoTestReport(type: JacocoReport, dependsOn: ['app:jacocoTestReport', 'javalib:jacocoTestReport', 'androidlib:jacocoTestReport']) {
+    def appTask = tasks.getByPath('app:jacocoTestReport')
+    def javalibTask = tasks.getByPath('javalib:jacocoTestReport')
+    def androidlibTask = tasks.getByPath('androidlib:jacocoTestReport')
+
+    executionData = files(
+            appTask.executionData,
+            javalibTask.executionData,
+            androidlibTask.executionData
+    )
+
+    sourceDirectories = files(
+            appTask.sourceDirectories,
+            javalibTask.sourceDirectories,
+            androidlibTask.sourceDirectories
+    )
+
+    classDirectories = files(
+            appTask.classDirectories,
+            javalibTask.classDirectories,
+            androidlibTask.classDirectories
+    )
 }

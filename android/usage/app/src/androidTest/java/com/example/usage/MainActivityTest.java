@@ -25,12 +25,4 @@ public class MainActivityTest {
         onView(withId(R.id.greeting)).check(matches(withText("[AndroidLib] Hello, Android!")));
     }
 
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

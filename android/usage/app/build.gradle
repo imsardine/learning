@@ -37,25 +37,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest', ':javalib:jacocoTestReport', ':androidlib:jacocoTestReport']) {
-    def javalibTask = tasks.getByPath(':javalib:jacocoTestReport')
-    def androidlibTask = tasks.getByPath(':androidlib:jacocoTestReport')
-
-    executionData = files(
-            fileTree(dir: buildDir, includes: ['jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*.ec']),
-            javalibTask.executionData,
-            androidlibTask.executionData
-    )
-
-    sourceDirectories = files(
-            fileTree(dir: projectDir, include: 'src/main/java'),
-            javalibTask.sourceDirectories,
-            androidlibTask.sourceDirectories
-    )
-
-    classDirectories = files(
-            fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: COVERAGE_INCLUDES, excludes: COVERAGE_EXCLUDES),
-            javalibTask.classDirectories,
-            androidlibTask.classDirectories
-    )
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
+    executionData = fileTree(dir: buildDir, includes: ['jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*.ec'])
+    sourceDirectories = files('src/main/java')
+    classDirectories = fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: COVERAGE_INCLUDES, excludes: COVERAGE_EXCLUDES)
 }
