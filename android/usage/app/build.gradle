@@ -21,6 +21,13 @@ android {
             testCoverageEnabled true
         }
     }
+    productFlavors {
+        prod {
+        }
+        mock {
+            applicationId 'com.example.usage.mock'
+        }
+    }
 }
 
 dependencies {
@@ -37,8 +44,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
-    executionData = fileTree(dir: buildDir, includes: ['jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*.ec'])
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testMockDebugUnitTest', 'connectedMockDebugAndroidTest']) {
+    executionData = fileTree(dir: buildDir, includes: ['jacoco/testMockDebugUnitTest.exec', 'outputs/code-coverage/connected/**/*.ec'])
     sourceDirectories = files('src/main/java')
-    classDirectories = fileTree(dir: "${buildDir}/intermediates/classes/debug", includes: COVERAGE_INCLUDES, excludes: COVERAGE_EXCLUDES)
+    classDirectories = fileTree(dir: "${buildDir}/intermediates/classes/mock/debug", includes: COVERAGE_INCLUDES, excludes: COVERAGE_EXCLUDES)
 }
