@@ -1,4 +1,4 @@
-package com.example.quickstart;
+package learning.espresso;
 
 import org.junit.Test;
 

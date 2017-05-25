@@ -1,4 +1,4 @@
-package com.example.quickstart;
+package learning.espresso;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

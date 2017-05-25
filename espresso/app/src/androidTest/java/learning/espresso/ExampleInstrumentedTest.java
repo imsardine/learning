@@ -1,4 +1,4 @@
-package com.example.quickstart;
+package learning.espresso;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.quickstart", appContext.getPackageName());
+        assertEquals("learning.espresso", appContext.getPackageName());
     }
 }
