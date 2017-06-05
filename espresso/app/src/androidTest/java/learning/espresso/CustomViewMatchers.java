@@ -8,6 +8,7 @@ import android.support.test.espresso.core.deps.guava.collect.Iterators;
 import android.support.test.espresso.util.TreeIterables;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewParent;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -19,13 +20,17 @@ import javax.annotation.Nullable;
 
 public class CustomViewMatchers {
 
-    public static Matcher<View> withPositionInRecyclerView(final int position, final Matcher<View> recyclerViewMatcher) {
+    public static Matcher<View> atPositionInRecyclerView(final int position, final Matcher<View> recyclerViewMatcher) {
         return new TypeSafeMatcher<View>() {
             @Override
             protected boolean matchesSafely(View view) {
-                RecyclerView recycler = (RecyclerView) findView(recyclerViewMatcher, view.getRootView());
-                View itemView = recycler.findViewHolderForAdapterPosition(position).itemView;
-                return view == itemView;
+                ViewParent parent = view.getParent();
+                if (recyclerViewMatcher.matches(view.getParent())) {
+                    View itemView = ((RecyclerView) parent).findViewHolderForAdapterPosition(position).itemView;
+                    return view == itemView;
+                } else {
+                    return false;
+                }
             }
 
             @Override
