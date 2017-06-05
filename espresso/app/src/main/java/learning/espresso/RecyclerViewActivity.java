@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -14,12 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewActivity extends AppCompatActivity {
+    private TextView selectedItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_view);
 
+        selectedItem = (TextView) findViewById(R.id.selected_item);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler);
         recyclerView.setAdapter(new CustomAdapter());
     }
@@ -56,9 +59,15 @@ public class RecyclerViewActivity extends AppCompatActivity {
     class CustomViewHolder extends ViewHolder {
         TextView textView;
 
-        CustomViewHolder(View itemView) {
+        CustomViewHolder(final View itemView) {
             super(itemView);
             textView = (TextView) itemView.findViewById(R.id.item_text);
+            textView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selectedItem.setText(textView.getText());
+                }
+            });
         }
 
     }
