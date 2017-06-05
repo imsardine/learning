@@ -25,7 +25,7 @@ public class CustomViewMatchers {
             @Override
             protected boolean matchesSafely(View view) {
                 ViewParent parent = view.getParent();
-                if (recyclerViewMatcher.matches(view.getParent())) {
+                if ((parent instanceof RecyclerView) && recyclerViewMatcher.matches(parent)) {
                     View itemView = ((RecyclerView) parent).findViewHolderForAdapterPosition(position).itemView;
                     return view == itemView;
                 } else {
