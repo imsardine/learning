@@ -30,26 +30,28 @@ ext {
     SUPPORT_LIBRARY_VERSION = '25.1.0'
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: ['app:jacocoTestReport', 'javalib:jacocoTestReport', 'androidlib:jacocoTestReport']) {
-    def appTask = tasks.getByPath('app:jacocoTestReport')
-    def javalibTask = tasks.getByPath('javalib:jacocoTestReport')
-    def androidlibTask = tasks.getByPath('androidlib:jacocoTestReport')
+task jacocoTestReport(type: JacocoReport) {
+    def appReport = tasks.getByPath('app:jacocoTestReport')
+    def javalibReport = tasks.getByPath('javalib:jacocoTestReport')
+    def androidlibReport = tasks.getByPath('androidlib:jacocoTestReport')
+
+    dependsOn appReport, javalibReport, androidlibReport
 
     executionData = files(
-            appTask.executionData,
-            javalibTask.executionData,
-            androidlibTask.executionData
+            appReport.executionData,
+            javalibReport.executionData,
+            androidlibReport.executionData
     )
 
     sourceDirectories = files(
-            appTask.sourceDirectories,
-            javalibTask.sourceDirectories,
-            androidlibTask.sourceDirectories
+            appReport.sourceDirectories,
+            javalibReport.sourceDirectories,
+            androidlibReport.sourceDirectories
     )
 
     classDirectories = files(
-            appTask.classDirectories,
-            javalibTask.classDirectories,
-            androidlibTask.classDirectories
+            appReport.classDirectories,
+            javalibReport.classDirectories,
+            androidlibReport.classDirectories
     )
 }
