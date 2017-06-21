@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -58,11 +59,15 @@ public class RecyclerViewActivity extends AppCompatActivity {
 
     class CustomViewHolder extends ViewHolder {
         TextView textView;
+        Button button;
 
         CustomViewHolder(final View itemView) {
             super(itemView);
+
             textView = (TextView) itemView.findViewById(R.id.item_text);
-            textView.setOnClickListener(new OnClickListener() {
+            button = (Button) itemView.findViewById(R.id.item_button);
+
+            button.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     selectedItem.setText(textView.getText());

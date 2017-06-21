@@ -12,10 +12,13 @@ import org.junit.runners.JUnit4;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 import static android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
 import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static learning.espresso.CustomViewActions.onChildView;
+import static learning.espresso.CustomViewAssertions.itemAtPosition;
 import static learning.espresso.CustomViewMatchers.atPositionInRecyclerView;
 import static org.hamcrest.Matchers.allOf;
 
@@ -26,11 +29,23 @@ public class RecyclerViewActivityTest {
     public ActivityTestRule<RecyclerViewActivity> activityRule = new ActivityTestRule<>(RecyclerViewActivity.class);
 
     @Test
-    public void itemOffScreen() {
+    public void clickItemOffScreen_atPositionInRecyclerView() {
         Matcher<View> itemAtPosition = atPositionInRecyclerView(29, withId(R.id.recycler));
+
         onView(withId(R.id.recycler)).perform(scrollToPosition(29));
         onView(allOf(withId(R.id.item_text), isDescendantOfA(itemAtPosition))).check(matches(withText("Item 30")));
-        onView(itemAtPosition).perform(click());
+        onView(allOf(withId(R.id.item_button), isDescendantOfA(itemAtPosition))).perform(click());
+        onView(withId(R.id.selected_item)).check(matches(withText("Item 30")));
+    }
+
+    @Test
+    public void clickItemOffScreen_atPositionOnChildView() {
+        onView(withId(R.id.recycler)).perform(scrollToPosition(30)).check(
+                itemAtPosition(30).onChildView(withId(R.id.item_text)).matches(withText("Item 31")));
+        onView(withId(R.id.recycler)).check(
+                itemAtPosition(29).onChildView(withId(R.id.item_text)).matches(withText("Item 30")));
+
+        onView(withId(R.id.recycler)).perform(actionOnItemAtPosition(29, onChildView(withId(R.id.item_button), click())));
         onView(withId(R.id.selected_item)).check(matches(withText("Item 30")));
     }
 
