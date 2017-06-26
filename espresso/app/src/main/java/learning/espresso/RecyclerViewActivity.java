@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -59,15 +60,15 @@ public class RecyclerViewActivity extends AppCompatActivity {
 
     class CustomViewHolder extends ViewHolder {
         TextView textView;
-        Button button;
+        CheckBox checkbox;
 
         CustomViewHolder(final View itemView) {
             super(itemView);
 
             textView = (TextView) itemView.findViewById(R.id.item_text);
-            button = (Button) itemView.findViewById(R.id.item_button);
+            checkbox = (CheckBox) itemView.findViewById(R.id.item_checkbox);
 
-            button.setOnClickListener(new OnClickListener() {
+            checkbox.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     selectedItem.setText(textView.getText());
