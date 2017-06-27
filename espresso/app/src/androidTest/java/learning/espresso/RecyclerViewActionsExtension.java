@@ -36,6 +36,50 @@ public class RecyclerViewActionsExtension {
         return new RecyclerViewItemAssertion(position);
     }
 
+    public static ViewAction checkItem(ViewAssertion viewAssertion) {
+        return new CheckItemAction(null, viewAssertion);
+    }
+
+    public static ViewAction checkItemChildView(Matcher<View> childMatcher, ViewAssertion viewAssertion) {
+        return new CheckItemAction(childMatcher, viewAssertion);
+    }
+
+    private static class CheckItemAction implements ViewAction {
+        private Matcher<View> childMatcher;
+
+        private ViewAssertion viewAssertion;
+
+        private CheckItemAction(Matcher<View> childMatcher, ViewAssertion viewAssertion) {
+            this.childMatcher = childMatcher;
+            this.viewAssertion = viewAssertion;
+        }
+
+        @Override
+        public Matcher<View> getConstraints() {
+            return null;
+        }
+
+        @Override
+        public String getDescription() {
+            return null;
+        }
+
+        @Override
+        public void perform(UiController uiController, View view) {
+            if (childMatcher == null) {
+                viewAssertion.check(view, null);
+            } else {
+                try {
+                    View childView = findView(childMatcher, view);
+                    viewAssertion.check(childView, null);
+                } catch (NoMatchingViewException e) {
+                    viewAssertion.check(null, e);
+                }
+            }
+        }
+
+    }
+
     private static class ChildViewAction implements ViewAction {
 
         private Matcher<View> childMatcher;
