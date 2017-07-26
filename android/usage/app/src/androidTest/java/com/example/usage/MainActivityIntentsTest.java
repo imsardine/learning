@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasExtra;
@@ -21,7 +22,7 @@ public class MainActivityIntentsTest {
 
     @Test
     public void hello() {
-        onView(withId(R.id.somebody)).perform(typeText("Android"));
+        onView(withId(R.id.somebody)).perform(typeText("Android"), closeSoftKeyboard());
         onView(withId(R.id.sayHello)).perform(click());
 
         // It is surprised that the activity is also launched

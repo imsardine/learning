@@ -1,42 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.usage.MainActivity">
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/samples_list"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/samples_list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="8dp" />
-
-        <LinearLayout
+        <EditText
+            android:id="@+id/somebody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:hint="World" />
 
-            <EditText
-                android:id="@+id/somebody"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="World" />
-
-            <Button
-                android:id="@+id/sayHello"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="sayHello"
-                android:text="Hello" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/sayHello"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="sayHello"
+            android:text="Hello" />
     </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
