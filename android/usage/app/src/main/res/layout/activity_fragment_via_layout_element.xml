@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <fragment android:tag="fragment_element"
+    <fragment android:id="@+id/fragment_element"
         android:name="com.example.usage.fragment.FragmentA"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
