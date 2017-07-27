@@ -17,10 +17,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 
-public class FragmentViaLayoutElementActivityTest {
+public class FragmentViaViewGroupActivityTest {
 
     @Rule
-    public ActivityTestRule<FragmentViaLayoutElementActivity> activityTestRule = new ActivityTestRule<>(FragmentViaLayoutElementActivity.class);
+    public ActivityTestRule<FragmentViaViewGroupActivity> activityTestRule = new ActivityTestRule<>(FragmentViaViewGroupActivity.class);
 
     @Test
     public void fragmentIsDisplayed() {
@@ -30,8 +30,11 @@ public class FragmentViaLayoutElementActivityTest {
 
     @Test
     public void fragmentRootViewIdIsDynamicallyReplaced() {
-        // The ID of the root view of the inflated layout comes from <fragment> element.
-        onView(withId(R.id.button)).check(matches(withParent(withId(R.id.fragment_placeholder))));
+        // Adding a fragment to an existing ViewGroup programmatically, the structure and IDs of
+        // both container (fragment_placeholder) and root view of the fragment's layout (fragment_root)
+        // are preserved.
+        onView(withId(R.id.button)).check(matches(withParent(withId(R.id.fragment_root))));
+        onView(withId(R.id.fragment_root)).check(matches(withParent(withId(R.id.fragment_placeholder))));
     }
 
 }

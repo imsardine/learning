@@ -19,6 +19,8 @@
         <activity android:name=".recycler.BasicRecyclerViewActivity"/>
         <activity android:name=".fragment.FragmentViaLayoutElementActivity">
         </activity>
+        <activity android:name=".fragment.FragmentViaViewGroupActivity">
+        </activity>
     </application>
 
 </manifest>

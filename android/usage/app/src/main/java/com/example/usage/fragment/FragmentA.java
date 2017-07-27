@@ -11,6 +11,10 @@ import com.example.usage.R;
 
 public class FragmentA extends Fragment {
 
+    public static FragmentA newInstance() {
+        return new FragmentA();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
