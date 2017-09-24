@@ -1,0 +1,9 @@
+#/usr/bin/env uwsgi
+echo Because of --virtualenv, you DO NOT have to activate the virtual environment first.
+echo Navigate to http://localhost:5000/hello/{somebody}
+
+UWSGI_DEBUG=1 \
+uwsgi --http 127.0.0.1:5000 --virtualenv venv \
+      --manage-script-name --mount /hello=hello_with_error:app \
+      --no-default-app --catch-exceptions --workers 4 --threads 4
+
