@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>Error Handling</title>
+  </head>
+  <body>
+    <ul>
+        <li><a href="/error" target="_blank">Raise RuntimeError (trigger GENERIC error handler `uncaught_exception()`)</li>
+        <li><a href="/secret/foobar" target="_blank">Raise PermissionDeniedError (trigger SPECIFIC error handler `permission_handler()`)</li>
+        <li><a href="/not-found" target="_blank">404 Not Found (trigger custom handler `not_found()`)</li>
+    </ul>
+  </body>
+</html>
