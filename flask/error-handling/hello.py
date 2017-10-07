@@ -32,7 +32,7 @@ def not_found(error):
 @app.errorhandler(PermissionDeniedError)
 def permission_denied(error):
     rollback_db_transaction()
-    return render_template('permission-denied.html', error=error), 503
+    return render_template('permission-denied.html', error=error), 403
 
 @app.errorhandler(Exception)
 def uncaught_exception(error):
