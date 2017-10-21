@@ -1,6 +1,6 @@
 package myapp;
 
-public class Hello {
+public class HelloWorld {
 
     public static void main(String[] args) {
         if (args.length == 0) {

@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.After;
 import static org.junit.Assert.*;
 
-public class HelloIntegrationTest {
+public class HelloWorldTest {
 
     @Before
     public void setUp() { }
@@ -45,7 +45,7 @@ public class HelloIntegrationTest {
 
     private String runImpl(String... args) throws IOException, InterruptedException {
         ArrayList<String> command = new ArrayList<String>();
-        command.addAll(Arrays.asList("java", "myapp.Hello"));
+        command.addAll(Arrays.asList("java", "myapp.HelloWorld"));
         command.addAll(Arrays.asList(args));
 
         ProcessBuilder pb = new ProcessBuilder(command);
