@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.After;
 import static org.junit.Assert.*;
 
-public class HelloTest {
+public class HelloIntegrationTest {
 
     @Before
     public void setUp() { }
