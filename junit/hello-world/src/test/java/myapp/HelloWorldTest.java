@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -21,18 +20,20 @@ public class HelloWorldTest {
     public void tearDown() { }
 
     @Test
-    public void run_NoArg_HelloWorld() {
-        assertEquals("Hello, World!\n", run());
+    public void sayHello_NoArg_HelloWorld() {
+        // Arrange preconditions
+        String output = run(); // Act on xxx under test (ex. CUT, AUT, SUT)
+        assertEquals("Hello, World!\n", output); // Assert expected results
     }
 
     @Test
-    public void run_SingleArg_HelloFirstArg() {
+    public void sayHello_SingleArg_HelloFirstArg() {
         assertEquals("Hello, Java!\n", run("Java"));
     }
 
     @Test
-    public void run_MultipleArgs_HelloFirstArg() {
-        assertEquals("Hello, Java!\n", run("Java", "Unit", "Testing"));
+    public void sayHello_SingleArgWithWhitespace_HelloFirstArg() {
+        assertEquals("Hello, Java Guys!\n", run("Java Guys"));
     }
 
     private String run(String... args) {
