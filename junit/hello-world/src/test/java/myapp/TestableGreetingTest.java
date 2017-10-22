@@ -30,21 +30,28 @@ public class TestableGreetingTest {
     @Before
     public void setUp() {
         out = new ByteArrayOutputStream();
-        this.greeting = new TestableGreeting(new PrintStream(out), timer);
+        this.greeting = new TestableGreeting(new PrintStream(out), timer); // test doubles
     }
 
     @Test
-    public void run_SunRise_GoodMorning() {
+    public void greet_SunRise_GoodMorning() {
         when(timer.currentTimeMillis()).thenReturn(at("2017-10-25 06:10:00"));
         greeting.run();
         assertEquals("Good morning!\n", out.toString());
     }
 
     @Test
-    public void run_LaunchTime_GoodA() {
+    public void greet_LaunchTime_GoodAfternoon() {
         when(timer.currentTimeMillis()).thenReturn(at("2017-10-25 12:10:00"));
         greeting.run();
         assertEquals("Good afternoon!\n", out.toString());
+    }
+
+    @Test
+    public void greet_Sunset_GoodEvening() {
+        when(timer.currentTimeMillis()).thenReturn(at("2017-10-25 18:00:00"));
+        greeting.run();
+        assertEquals("Good evening!\n", out.toString());
     }
 
     private long at(String time) {

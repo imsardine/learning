@@ -25,7 +25,7 @@ public class TestableGreeting {
 
        if (hour >= 6 && hour < 12) {
            out.println("Good morning!");
-       } else if (hour >= 12 && hour < 17) {
+       } else if (hour >= 12 && hour <= 17) {
            out.println("Good afternoon!");
        } else if (hour >= 17 && hour <= 22) {
            out.println("Good evening!");
