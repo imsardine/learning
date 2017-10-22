@@ -54,6 +54,13 @@ public class TestableGreetingTest {
         assertEquals("Good evening!\n", out.toString());
     }
 
+    @Test
+    public void greet_Midnight_GoodEvening() {
+        when(timer.currentTimeMillis()).thenReturn(at("2017-10-25 00:30:00"));
+        greeting.run();
+        assertEquals("Zzz...\n", out.toString());
+    }
+
     private long at(String time) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
