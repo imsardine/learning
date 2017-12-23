@@ -15,7 +15,7 @@ def test_lazy_connecting(tmpdir):
     assert isinstance(conn, sqlalchemy.engine.Connection)
     assert path.exists(db_file)
 
-def test_create_tables_sqlite():
+def test_define_tables_sqlite():
     metadata = MetaData()
     users = Table('user', metadata,
             Column('id', Integer, primary_key=True),
@@ -45,7 +45,7 @@ def test_create_tables_sqlite():
         	FOREIGN KEY(user_id) REFERENCES user (id)
         )""")
 
-def test_create_tables_mysql():
+def test_define_tables_mysql():
     # CompileError: (in table 'user', column 'name'): VARCHAR requires a length on dialect mysql
     metadata = MetaData()
     users = Table('user', metadata,
@@ -79,4 +79,22 @@ def test_create_tables_mysql():
 def create_table_sql(table, dialect_module):
     from sqlalchemy.schema import CreateTable
     return str(CreateTable(table).compile(dialect=dialect_module.dialect())).strip()
+
+def test_create_tables(tmpdir):
+    db_file = path.join(tmpdir.strpath, 'test.db')
+
+    engine = create_engine('sqlite:///%s' % db_file)
+    metadata = MetaData()
+    users = Table('user', metadata, Column('id', Integer, primary_key=True))
+
+    metadata.create_all(engine)
+    assert sqlite3(db_file, '.schema'), dedent("""\
+        CREATE TABLE user (
+        	id INTEGER NOT NULL,
+        	PRIMARY KEY (id)
+        );""")
+
+def sqlite3(db_file, command):
+    import subprocess
+    return subprocess.check_output(['sqlite3', db_file, command])
 
