@@ -42,7 +42,7 @@ def test_create_session_factory():
     session = Session() # instantiation
     assert isinstance(session, sqlalchemy.orm.Session)
 
-def test_insert(caplog):
+def test_insert_and_object_states(caplog):
     engine = create_engine('sqlite:///:memory:', echo=True)
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)()
@@ -66,5 +66,27 @@ def test_insert(caplog):
         'INSERT INTO user (name, fullname) VALUES (?, ?)',
         "('Jeremy', 'Jeremy Kao')",
         'COMMIT'
+    ]
+
+def test_autoflush_and_identitymap(caplog):
+    engine = create_engine('sqlite:///:memory:', echo=True)
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)() # autoflush=True
+
+    caplog.clear()
+    user = User(name='Jeremy', fullname='Jeremy Kao')
+    session.add(user)
+    user_ = session.query(User).filter_by(name='Jeremy').one()
+
+    assert user_ is user # identity map
+
+    # INSERT (autoflush), SELECT ... No COMMIT at the end
+    sqls = [r.message for r in caplog.records]
+    assert sqls == [
+        'BEGIN (implicit)',
+        'INSERT INTO user (name, fullname) VALUES (?, ?)',
+        "('Jeremy', 'Jeremy Kao')",
+        'SELECT user.id AS user_id, user.name AS user_name, user.fullname AS user_fullname \nFROM user \nWHERE user.name = ?',
+        "('Jeremy',)",
     ]
 
