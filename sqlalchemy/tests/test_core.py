@@ -1,8 +1,8 @@
+from tests import *
 from os import path
 from textwrap import dedent
 import sqlalchemy
 from sqlalchemy import create_engine
-from sqlalchemy.dialects import sqlite, mysql
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 
 def test_lazy_connecting(tmpdir):
@@ -28,7 +28,7 @@ def test_define_tables_sqlite():
             Column('email', String, nullable=False),
     )
 
-    assert create_table_sql(users, sqlite) == dedent("""\
+    assert create_table_sql(users, sqlite_dialect) == dedent("""\
         CREATE TABLE user (
         	id INTEGER NOT NULL, 
         	name VARCHAR, 
@@ -36,7 +36,7 @@ def test_define_tables_sqlite():
         	PRIMARY KEY (id)
         )""")
 
-    assert create_table_sql(addresses, sqlite) == dedent("""\
+    assert create_table_sql(addresses, sqlite_dialect) == dedent("""\
         CREATE TABLE address (
         	id INTEGER NOT NULL, 
         	user_id INTEGER, 
@@ -59,7 +59,7 @@ def test_define_tables_mysql():
             Column('email', String(100), nullable=False),
     )
 
-    assert create_table_sql(users, mysql) == dedent("""\
+    assert create_table_sql(users, mysql_dialect) == dedent("""\
         CREATE TABLE user (
         	id INTEGER NOT NULL AUTO_INCREMENT, 
         	name VARCHAR(20), 
@@ -67,7 +67,7 @@ def test_define_tables_mysql():
         	PRIMARY KEY (id)
         )""")
 
-    assert create_table_sql(addresses, mysql) == dedent("""\
+    assert create_table_sql(addresses, mysql_dialect) == dedent("""\
         CREATE TABLE address (
         	id INTEGER NOT NULL AUTO_INCREMENT, 
         	user_id INTEGER, 
@@ -75,10 +75,6 @@ def test_define_tables_mysql():
         	PRIMARY KEY (id), 
         	FOREIGN KEY(user_id) REFERENCES user (id)
         )""")
-
-def create_table_sql(table, dialect_module):
-    from sqlalchemy.schema import CreateTable
-    return str(CreateTable(table).compile(dialect=dialect_module.dialect())).strip()
 
 def test_create_tables(tmpdir):
     db_file = path.join(tmpdir.strpath, 'test.db')
@@ -93,8 +89,4 @@ def test_create_tables(tmpdir):
         	id INTEGER NOT NULL,
         	PRIMARY KEY (id)
         );""")
-
-def sqlite3(db_file, command):
-    import subprocess
-    return subprocess.check_output(['sqlite3', db_file, command])
 
