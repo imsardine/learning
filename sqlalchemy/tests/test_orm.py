@@ -1,8 +1,11 @@
 from tests import *
 from textwrap import dedent
 import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String
+from sqlalchemy import inspect
 
 Base = declarative_base()
 
@@ -27,4 +30,39 @@ def test_mapping_process():
         	fullname VARCHAR, 
         	PRIMARY KEY (id)
         )""")
+
+def test_create_session_factory():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    engine = create_engine('sqlite:///:memory:')
+    Session = sessionmaker(bind=engine) # factory
+    assert not isinstance(Session, sqlalchemy.orm.Session)
+
+    session = Session() # instantiation
+    assert isinstance(session, sqlalchemy.orm.Session)
+
+def test_insert(caplog):
+    engine = create_engine('sqlite:///:memory:', echo=True)
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)()
+
+    user = User(name='Jeremy', fullname='Jeremy Kao')
+    assert user not in session
+    assert inspect(user).transient
+
+    session.add(user)
+    assert inspect(user).pending
+
+    caplog.clear()
+    session.commit()
+
+    sqls = [r.message for r in caplog.records]
+    assert inspect(user).persistent
+    assert sqls == [
+        'BEGIN (implicit)',
+        'INSERT INTO user (name, fullname) VALUES (?, ?)',
+        "('Jeremy', 'Jeremy Kao')",
+        'COMMIT'
+    ]
 
