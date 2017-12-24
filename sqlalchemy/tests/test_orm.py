@@ -53,12 +53,14 @@ def test_insert(caplog):
 
     session.add(user)
     assert inspect(user).pending
+    assert user.id == None
 
     caplog.clear()
     session.commit()
 
     sqls = [r.message for r in caplog.records]
     assert inspect(user).persistent
+    assert user.id == 1
     assert sqls == [
         'BEGIN (implicit)',
         'INSERT INTO user (name, fullname) VALUES (?, ?)',
