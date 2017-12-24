@@ -21,7 +21,7 @@ def test_mapping_process():
     assert isinstance(User.id, sqlalchemy.orm.attributes.InstrumentedAttribute)
 
     # Mappped
-    assert Base.metadata == User.__table__.metadata
+    assert Base.metadata is User.__table__.metadata
     assert Base.metadata.tables == { 'user': User.__table__ }
     assert create_table_sql(User.__table__, sqlite_dialect) == dedent("""\
         CREATE TABLE user (
@@ -53,7 +53,7 @@ def test_insert(caplog):
 
     session.add(user)
     assert inspect(user).pending
-    assert user.id == None
+    assert user.id is None
 
     caplog.clear()
     session.commit()
