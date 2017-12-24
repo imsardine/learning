@@ -20,6 +20,10 @@ def test_logging_records(caplog):
     assert len(logs) == 1
     assert logs[0].message == 'somebody: None'
 
+def test_logging_text(caplog):
+    main.say_hello()
+    assert 'somebody: None' in caplog.text # final log text
+
 def test_logging_reset(caplog):
     logging.info('Before calling app code')
     caplog.clear() # reset captured log records
