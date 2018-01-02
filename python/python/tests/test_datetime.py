@@ -25,6 +25,7 @@ def test_default_serializer():
             return obj.isoformat()
         else:
             return str(obj)
+            # raise TypeError('%r is not JSON serializable' % obj)
 
     data = [
         date(2018, 1, 2),
