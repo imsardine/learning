@@ -28,9 +28,10 @@ def test_default_serializer():
             # raise TypeError('%r is not JSON serializable' % obj)
 
     data = [
+        1, 'one',
         date(2018, 1, 2),
         datetime(2018, 1, 2, 13, 50, tzinfo=pytz.utc),
     ]
     s = json.dumps(data, default=default)
-    assert s == '["2018-01-02", "2018-01-02T13:50:00+00:00"]'
+    assert s == '[1, "one", "2018-01-02", "2018-01-02T13:50:00+00:00"]'
 
