@@ -1,2 +1,5 @@
 pip install -e .
 FLASK_APP=hello_package FLASK_DEBUG=1 flask run
+
+# Or
+# FLASK_APP=hello_package FLASK_DEBUG=1 python -m flask run
