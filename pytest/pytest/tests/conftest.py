@@ -16,6 +16,6 @@ class DataFileHelper(object):
 
 @pytest.fixture
 def datafile(request):
-    base_dir = path.join(path.dirname(request.module.__file__), 'data')
+    base_dir = path.dirname(request.module.__file__)
     return DataFileHelper(base_dir)
 
