@@ -21,6 +21,15 @@ def test_url_decode__dict():
         'dt': ['2018-03-20T17:00:00+08:00'] # list of values
     }
 
+def test_url_decode__list():
+    query_string = 'key=value&dt=2018-03-20T17%3A00%3A00%2B08%3A00'
+    params = urlparse.parse_qsl(query_string)
+
+    assert params == [
+        ('key', 'value'),
+        ('dt', '2018-03-20T17:00:00+08:00')
+    ]
+
 def test_url_encode__unicode__raise_error():
     data = {'unicode': u'中文'}
 
