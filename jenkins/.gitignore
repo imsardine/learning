@@ -1,0 +1,3 @@
+*.pyc
+/venv-jenkins/
+/jenkins_home/
