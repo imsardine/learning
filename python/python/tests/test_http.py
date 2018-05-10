@@ -16,6 +16,7 @@ def test_urlopen__return_file_like():
 
     # file-like
     assert json.loads(resp.read()) == {
+        'Content-Length': '79',
         'Content-Type': 'application/json',
         'myheader': 'myvalue'
     }
