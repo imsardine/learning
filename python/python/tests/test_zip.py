@@ -1,6 +1,7 @@
 import os
+import shutil
 from os import path
-from zipfile import ZipFile, is_zipfile, ZIP_DEFLATED
+from zipfile import ZipFile, is_zipfile, ZIP_DEFLATED, ZIP_STORED
 import pytest
 
 def test_validate_zipfile__valid(datafile):
@@ -48,19 +49,57 @@ def test_check_integrity(datafile):
     assert bad_files != None
 
 def test_archive__deflate_compression(datafile, tmpdir):
-    content_dir = datafile.relpath('data/zip/content')
+    srcdir = datafile.relpath('data/zip/content')
 
     # Not to change current working directory
     zfn = tmpdir.join('archive.zip').strpath
-    with ZipFile(zfn, 'w', compression=ZIP_DEFLATED) as zf:
-        for dirpath, dirnames, filenames in os.walk(content_dir):
+    with ZipFile(zfn, 'w') as zf:
+        for dirpath, dirnames, filenames in os.walk(srcdir):
+            if not path.samefile(dirpath, srcdir):
+                arcname = path.relpath(dirpath, srcdir)
+                zf.write(dirpath, arcname, compress_type=ZIP_STORED)
+
             for fn in filenames:
-                fn_full = path.join(dirpath, fn)
-                arcname = path.relpath(fn_full, content_dir)
-                zf.write(fn_full, arcname)
+                fpath = path.join(dirpath, fn)
+                arcname = path.relpath(fpath, srcdir)
+                zf.write(fpath, arcname, compress_type=ZIP_DEFLATED)
 
     with ZipFile(zfn) as zf:
-        assert sorted(zf.namelist()) == [ # no dirs?
+        assert sorted(zf.namelist()) == [ # including dir entries
+            'dir1/',
+            'dir1/dir1-1/',
+            'dir1/dir1-2/',
+            'dir1/file1-1.txt',
+            'dir1/file1-2.txt',
+            'dir2/',
+            'dir2/file2-1.txt',
+            'dir2/file2-2.txt',
+            'file1.txt',
+            'file2.txt',
+        ]
+
+        info = zf.getinfo('file1.txt')
+        assert info.compress_type == ZIP_DEFLATED
+        assert info.file_size < info.compress_size # inefficient!
+
+        info = zf.getinfo('dir1/')
+        assert info.compress_type == ZIP_STORED
+        assert info.file_size == info.compress_size == 0
+
+        info = zf.getinfo('dir1/file1-1.txt')
+        assert info.compress_type == ZIP_DEFLATED
+        assert info.file_size > info.compress_size
+
+        assert zf.read(info.filename) == 'file1-1\ncontent\ncontent\ncontent\n'
+
+def test_archive__shutil_make_archive(datafile, tmpdir):
+    srcdir = datafile.relpath('data/zip/content')
+
+    zfn = tmpdir.join('archive.zip').strpath
+    shutil.make_archive(path.splitext(zfn)[0], 'zip', srcdir)
+
+    with ZipFile(zfn) as zf:
+        assert sorted(zf.namelist()) == [ # no dir entries
             'dir1/file1-1.txt',
             'dir1/file1-2.txt',
             'dir2/file2-1.txt',
@@ -69,9 +108,12 @@ def test_archive__deflate_compression(datafile, tmpdir):
             'file2.txt',
         ]
 
+        info = zf.getinfo('file1.txt')
+        assert info.compress_type == ZIP_DEFLATED
+        assert info.file_size < info.compress_size # inefficient!
+
         info = zf.getinfo('dir1/file1-1.txt')
         assert info.compress_type == ZIP_DEFLATED
         assert info.file_size > info.compress_size
 
         assert zf.read(info.filename) == 'file1-1\ncontent\ncontent\ncontent\n'
-
