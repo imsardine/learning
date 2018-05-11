@@ -9,6 +9,9 @@ class DataFileHelper(object):
     def abspath(self, fn):
         return path.join(self._base_dir, fn)
 
+    def relpath(self, fn):
+        return path.relpath(self.abspath(fn)) # relative to CWD
+
     def read(self, fn, encoding=None):
         with open(self.abspath(fn), 'rb') as f:
             data = f.read()

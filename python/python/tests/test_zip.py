@@ -1,11 +1,12 @@
 import os
-from zipfile import ZipFile, is_zipfile
+from os import path
+from zipfile import ZipFile, is_zipfile, ZIP_DEFLATED
 import pytest
 
-def test_validate_zipfile_valid(datafile):
+def test_validate_zipfile__valid(datafile):
     assert is_zipfile(datafile.abspath('data/zip/sample.zip')) # based on its magic number
 
-def test_validate_zipfile_invalid(datafile):
+def test_validate_zipfile__invalid(datafile):
     assert not is_zipfile(datafile.abspath('data/zip/sample.txt.zip'))
 
 def test_get_filelist_without_extraction(datafile):
@@ -18,7 +19,7 @@ def test_get_filelist_without_extraction(datafile):
 def test_read_file_without_extraction(datafile):
     zipfile = datafile.abspath('data/zip/sample.zip')
     content = ZipFile(zipfile).read('dir1/file1-1.txt')
-    assert content == 'file1-1\n'
+    assert content == 'file1-1\ncontent\ncontent\ncontent\n'
 
 def test_extract_all(datafile, tmpdir):
     zipfile = datafile.abspath('data/zip/sample.zip')
@@ -45,4 +46,32 @@ def test_check_integrity(datafile):
 
     bad_files = ZipFile(zipfile_broken).testzip() # doesn't work?
     assert bad_files != None
+
+def test_archive__deflate_compression(datafile, tmpdir):
+    content_dir = datafile.relpath('data/zip/content')
+
+    # Not to change current working directory
+    zfn = tmpdir.join('archive.zip').strpath
+    with ZipFile(zfn, 'w', compression=ZIP_DEFLATED) as zf:
+        for dirpath, dirnames, filenames in os.walk(content_dir):
+            for fn in filenames:
+                fn_full = path.join(dirpath, fn)
+                arcname = path.relpath(fn_full, content_dir)
+                zf.write(fn_full, arcname)
+
+    with ZipFile(zfn) as zf:
+        assert sorted(zf.namelist()) == [ # no dirs?
+            'dir1/file1-1.txt',
+            'dir1/file1-2.txt',
+            'dir2/file2-1.txt',
+            'dir2/file2-2.txt',
+            'file1.txt',
+            'file2.txt',
+        ]
+
+        info = zf.getinfo('dir1/file1-1.txt')
+        assert info.compress_type == ZIP_DEFLATED
+        assert info.file_size > info.compress_size
+
+        assert zf.read(info.filename) == 'file1-1\ncontent\ncontent\ncontent\n'
 
