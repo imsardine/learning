@@ -1,3 +1,19 @@
+def test_skipping__no_extra_summary(cli):
+    r1 = cli.run('pytest -v data/tests/test_skip.py')
+    r2 = cli.run('pytest -v data/tests/test_xfail.py')
+
+    assert 'Reason for' not in r1.out
+    assert 'Reason for' not in r2.out
+
+def test_skipping__with_extra_summary(cli):
+    # -ra, where 'a' stands for (a)ll except passed
+    r1 = cli.run('pytest -v -ra data/tests/test_skip.py')
+    r2 = cli.run('pytest -v -ra data/tests/test_xfail.py')
+
+    assert 'Reason for skipping' in r1.out
+    assert 'Reason for expecting to fail (xfailed)' in r2.out
+    assert 'Reason for expecting to fail (xpassed)' in r2.out
+
 def test_skip(cli):
     r = cli.run('pytest -v data/tests/test_skip.py')
 
