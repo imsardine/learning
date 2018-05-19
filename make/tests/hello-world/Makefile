@@ -1,6 +1,6 @@
-# Environment variable `WHO` for customization
-TO = $(or $(WHO), 'World')
+# Conditional assignment
+WHO ?= 'World'
 
 hello:
-	@echo Hello, $(TO)'!' # Inline comments passed to shell
+	@echo Hello, $(WHO)'!' # Inline comments passed to shell
 

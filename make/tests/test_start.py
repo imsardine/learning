@@ -1,35 +1,20 @@
+from matchers import *
+
 def test_version(cli):
-    out, _, _ = cli.run('make --version')
-    assert out.splitlines()[0] == matches(r'GNU Make \d+\.\d+')
+    r = cli.run('make --version')
+    assert r.out.splitlines()[0] == matches(r'GNU Make \d+\.\d+')
+
+def test_default_make_file_and_target(cli):
+    r1 = cli.run('make', cwd='hello-world')
+    r2 = cli.run('make hello', cwd='hello-world')
+    r3 = cli.run('make -f hello-world/Makefile')
+    assert r1.out == r2.out == r3.out == 'Hello, World!\n'
 
 def test_hello_world(cli):
-    out, _, _ = cli.run('make', cwd='hello-world')
-    assert out == 'Hello, World!\n'
+    r = cli.run('make -f hello-world/Makefile hello')
+    assert r.out == 'Hello, World!\n'
 
 def test_hello_world_customization(cli):
-    out, _, _ = cli.run('WHO=Make make', cwd='hello-world')
-    assert out == 'Hello, Make!\n'
+    r = cli.run('WHO=Make make -f hello-world/Makefile hello')
+    assert r.out == 'Hello, Make!\n'
 
-import re
-
-class _RegexMatcher():
-
-    def __init__(self, regex):
-        self._regex = regex
-
-    def __eq__(self, other):
-        return re.match(self._regex, other)
-
-def matches(regex):
-    return _RegexMatcher(regex)
-
-class _ContainsMatcher():
-
-    def __init__(self, substr):
-        self._substr = substr
-
-    def __eq__(self, other):
-        return self._substr in other
-
-def contains(substr):
-    return _ContainsMatcher(substr)

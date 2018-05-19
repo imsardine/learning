@@ -11,6 +11,9 @@ class DataFileHelper(object):
     def abspath(self, fn):
         return path.join(self._base_dir, fn)
 
+    def relpath(self, fn):
+        return path.relpath(self.abspath(fn)) # relative to CWD
+
     def read(self, fn, encoding=None):
         with open(self.abspath(fn), 'rb') as f:
             data = f.read()
@@ -37,9 +40,17 @@ class CommandLine(object):
             p = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True)
 
             out, err = p.communicate()
-            return (out.decode('utf-8'), err.decode('utf-8'), p.returncode)
+            return CommandLineResult(
+                out.decode('utf-8'), err.decode('utf-8'), p.returncode)
         finally:
             os.chdir(_cwd)
+
+class CommandLineResult(object):
+
+    def __init__(self, out, err, rc):
+        self.out = out
+        self.err = err
+        self.rc = rc
 
 @pytest.fixture
 def testdata(request):
