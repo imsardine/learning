@@ -1,0 +1,2 @@
+GITLAB_URL ?= https://gitlab.com/api/v4
+GITLAB_ACCESS_TOKEN ?= YOUR_ACCESS_TOKEN_HERE

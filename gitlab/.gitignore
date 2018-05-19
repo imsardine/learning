@@ -1,0 +1,7 @@
+/venv/
+
+*.pyc
+/tests/__pycache__/
+
+/Makefile.settings*
+!/Makefile.settings.sample
