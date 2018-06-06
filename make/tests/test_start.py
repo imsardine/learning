@@ -5,16 +5,26 @@ def test_version(cli):
     assert r.out.splitlines()[0] == matches(r'GNU Make \d+\.\d+')
 
 def test_default_make_file_and_target(cli):
-    r1 = cli.run('make', cwd='hello-world')
-    r2 = cli.run('make hello', cwd='hello-world')
-    r3 = cli.run('make -f hello-world/Makefile')
-    assert r1.out == r2.out == r3.out == 'Hello, World!\n'
+    cli.src('Makefile', r"""
+    hello:
+    	@echo 'Hello, World!' # Inline comments passed to shell
+    """)
 
-def test_hello_world(cli):
-    r = cli.run('make -f hello-world/Makefile hello')
-    assert r.out == 'Hello, World!\n'
+    r1 = cli.run('make')
+    r2 = cli.run('make hello')
+    r3 = cli.run('make -f Makefile')
+    r4 = cli.run('make -f Makefile hello')
+    assert r1.out == r2.out == r3.out == r4.out == 'Hello, World!\n'
 
-def test_hello_world_customization(cli):
-    r = cli.run('WHO=Make make -f hello-world/Makefile hello')
-    assert r.out == 'Hello, Make!\n'
+def test_variable_overriding(cli):
+    cli.src('Makefile', r"""
+    # Conditional assignment
+    WHO ?= 'World'
+
+    hello:
+    	@echo Hello, $(WHO)'!' # Inline comments passed to shell
+    """)
+
+    assert cli.run('make').out == 'Hello, World!\n'
+    assert cli.run('WHO=Make make').out == 'Hello, Make!\n'
 

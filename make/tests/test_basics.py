@@ -1,4 +1,15 @@
 def test_include(cli):
-    r = cli.run('make', cwd='basics/include')
-    assert r.out == 'user@example.com / secret'
+    cli.src('Makefile', r"""
+    include settings
+
+    target:
+    	@echo -n $(USERNAME) / $(PASSWORD)
+    """)
+
+    cli.src('settings', r"""
+    USERNAME = user@example.com
+    PASSWORD = secret
+    """)
+
+    assert cli.run('make').out == 'user@example.com / secret'
 
