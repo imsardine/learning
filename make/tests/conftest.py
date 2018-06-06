@@ -3,6 +3,7 @@ import os, sys
 from os import path
 from subprocess import Popen, PIPE, CalledProcessError
 from textwrap import dedent
+import re
 import pytest
 
 class DataFileHelper(object):
@@ -25,13 +26,15 @@ class DataFileHelper(object):
         import json
         return json.loads(self.read(fn, encoding))
 
+SRC_PATTERN = re.compile(r'^\n?(?P<content>.*)\n?\s*$', re.DOTALL)
+
 class CommandLine(object):
 
     def __init__(self, workdir):
         print('WORKDIR = %s' % workdir, file=sys.stderr)
         self.workdir = workdir
 
-    def run(self, cmdline):
+    def run(self, cmdline, err_expected=False):
         _cwd = os.getcwd()
         assert path.isabs(_cwd), _cwd
 
@@ -40,21 +43,31 @@ class CommandLine(object):
             p = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True)
 
             out, err = p.communicate()
-            if p.returncode != 0:
+            if p.returncode != 0 and not err_expected:
                 print(out, file=sys.stdout)
                 print(err, file=sys.stderr)
                 raise CalledProcessError(p.returncode, cmdline)
+            elif p.returncode == 0 and err_expected:
+                assert False, 'Error expected!'
 
             return CommandLineResult(
                 out.decode('utf-8'), err.decode('utf-8'), p.returncode)
         finally:
             os.chdir(_cwd)
 
+    def run_err(self, cmdline):
+        return self.run(cmdline, err_expected=True)
+
     def src(self, pathname, content, encoding='utf-8'):
         if not path.isabs(pathname):
             pathname = path.join(self.workdir, pathname)
         with open(pathname, 'wb') as f:
-            f.write(dedent(content).encode(encoding))
+            f.write(self._trim(content).encode(encoding))
+
+    def _trim(self, content):
+        match = SRC_PATTERN.match(content)
+        assert match, content
+        return dedent(match.group('content'))
 
 class CommandLineResult(object):
 
