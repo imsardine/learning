@@ -33,7 +33,7 @@ class _CProgram():
         self._cli = cli
 
     def run(self, main_body):
-        self._cli.src('main.c', """\
+        self._cli.src('main.c', """
             #include <stdio.h>
 
             int main() {

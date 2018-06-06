@@ -28,6 +28,7 @@ class DataFileHelper(object):
 class CommandLine(object):
 
     def __init__(self, workdir):
+        print('WORKDIR = %s' % workdir, file=sys.stderr)
         self.workdir = workdir
 
     def run(self, cmdline):
