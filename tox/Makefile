@@ -6,4 +6,4 @@ setup:
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 
 test:
-	PATH=$(VENV_DIR)/bin:$(PATH) pytest -vvv
+	PATH=$(VENV_DIR)/bin:$(PATH) pytest -vvv $(TEST)

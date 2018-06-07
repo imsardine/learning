@@ -11,6 +11,7 @@ def test_hello_world(cli):
     # setup.py in the same directory
     cli.src('setup.py', r"""
     from setuptools import setup
+
     setup(
         name='hello-world',
         packages=['hello'],
@@ -27,11 +28,10 @@ def test_hello_world(cli):
     # test code; at least one test
     cli.src('tests/test_hello.py', r"""
     from hello import hello
-    import pytest
 
     def test_hello():
         assert hello.say_hello() == 'Hello, World!'
-        assert hello.say_hello('Pytest') == 'Hello, Pytest!'
+        assert hello.say_hello('pytest') == 'Hello, pytest!'
     """)
 
     r = cli.run('tox')
@@ -54,6 +54,7 @@ def test_interpreter_not_found(cli):
 
     cli.src('setup.py', r"""
     from setuptools import setup
+
     setup(
         name='proj',
     )
