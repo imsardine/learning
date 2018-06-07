@@ -42,7 +42,20 @@ def test_hello_world(cli):
     assert cli.exists('.tox/')
     assert cli.exists('hello_world.egg-info/')
 
-def test_interpreter_not_found(cli):
+def test_invoke_tox__no_setuppy__error(cli):
+    cli.src('tox.ini', r"""
+    [tox]
+    envlist = py27,py36
+
+    [testenv]
+    deps = pytest
+    commands = pytest
+    """)
+
+    r = cli.run_err('tox')
+    assert 'ERROR: No setup.py file found.' in r.out
+
+def test_invoke_tox__interpreter_not_installed__error(cli):
     cli.src('tox.ini', r"""
     [tox]
     envlist = py37
