@@ -1,3 +1,5 @@
+from matchers import like
+
 def test_hello_world(cli):
     cli.src('tox.ini', r"""
     [tox]
@@ -35,8 +37,29 @@ def test_hello_world(cli):
     """)
 
     r = cli.run('tox')
-    assert 'py27: commands succeeded' in r.out
-    assert 'py36: commands succeeded' in r.out
+    assert r.out == like("""
+    ...
+    py27 create: .../.tox/py27
+    py27 installdeps: pytest
+    ...
+    collected 1 item
+
+    tests/test_hello.py .                                                    [100%]
+
+    =========================== 1 passed in ...
+    py36 create: .../.tox/py36
+    py36 installdeps: pytest
+    ...
+    collected 1 item
+
+    tests/test_hello.py .                                                    [100%]
+
+    =========================== 1 passed in ...
+    ___________________________________ summary ____________________________________
+      py27: commands succeeded
+      py36: commands succeeded
+      congratulations :)
+    """)
 
     # directories .tox/ and *.egg-info/ got created
     assert cli.exists('.tox/')

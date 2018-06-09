@@ -26,7 +26,7 @@ class DataFileHelper(object):
         import json
         return json.loads(self.read(fn, encoding))
 
-SRC_PATTERN = re.compile(r'^\n?(?P<content>.*)\n?\s*$', re.DOTALL)
+INDENTED_LITERAL = re.compile(r'^\n?(?P<content>.*)\n?\s*$', re.DOTALL)
 
 class CommandLine(object):
 
@@ -83,8 +83,9 @@ class CommandLine(object):
         return pathname
 
     def _trim(self, content):
-        match = SRC_PATTERN.match(content)
+        match = INDENTED_LITERAL.match(content)
         assert match, content
+
         return dedent(match.group('content'))
 
 class CommandLineResult(object):

@@ -1,4 +1,5 @@
 import pytest
+from matchers import *
 
 def test_py2_py3__separate_files(cli):
     cli.src('tox.ini', r"""
@@ -44,8 +45,27 @@ def test_py2_py3__separate_files(cli):
     """)
 
     r = cli.run('tox')
-    assert 'py27: commands succeeded' in r.out
-    assert 'py36: commands succeeded' in r.out
+    assert r.out == like("""
+    ...
+    py27 runtests: ...
+    collected 2 items
+
+    tests/test_hello.py .                                                    [ 50%]
+    tests/py2/test_hello_py2.py .                                            [100%]
+
+    =========================== 2 passed in ...
+    py36 runtests: ...
+    collected 2 items
+
+    tests/test_hello.py .                                                    [ 50%]
+    tests/py3/test_hello_py3.py .                                            [100%]
+
+    =========================== 2 passed in ...
+    ___________________________________ summary ____________________________________
+      py27: commands succeeded
+      py36: commands succeeded
+      congratulations :)
+    """)
 
 def test_py2_py3__mixed(cli):
     cli.src('tox.ini', r"""
@@ -85,5 +105,22 @@ def test_py2_py3__mixed(cli):
     """)
 
     r = cli.run('tox')
-    assert 'py27: commands succeeded' in r.out
-    assert 'py36: commands succeeded' in r.out
+    assert r.out == like("""
+    ...
+    py27 runtests: ...
+    collected 3 items
+
+    tests/test_hello.py ..s                                                  [100%]
+
+    ===================== 2 passed, 1 skipped in ...
+    py36 runtests: ...
+    collected 3 items
+
+    tests/test_hello.py .s.                                                  [100%]
+
+    ===================== 2 passed, 1 skipped in ...
+    ___________________________________ summary ____________________________________
+      py27: commands succeeded
+      py36: commands succeeded
+      congratulations :)
+    """)
