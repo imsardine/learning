@@ -1,4 +1,7 @@
 *.pyc
 /venv/
 
-/tests/__pycache__/
+# tox, pytest
+/.tox/
+/.pytest_cache/
+/learning_pytest.egg-info/

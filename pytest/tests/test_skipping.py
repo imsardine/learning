@@ -1,4 +1,4 @@
-from matchers import *
+from .matchers import *
 
 TEST_SKIPPING_PY = """
     import pytest

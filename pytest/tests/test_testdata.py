@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 def test_testdata_read(testdata):
-    assert testdata.read('data/hello.json') == dedent("""\
+    assert testdata.read('data/hello.json', 'utf-8') == dedent("""\
         {
           "greeting": "Hello",
           "object": "World"

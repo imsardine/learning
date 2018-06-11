@@ -1,5 +1,5 @@
 import pytest
-from matchers import *
+from .matchers import *
 
 def test_version(cli):
     r = cli.run('pytest --version')
