@@ -1,7 +1,13 @@
-import urllib, urllib2
-import mimetools
+import sys
+import urllib
 import json
 import pytest
+
+if sys.version_info[0] == 2:
+    import urllib2
+    import mimetools
+else:
+    pytestmark = pytest.mark.skip()
 
 def test_urlopen__return_file_like():
     resp = urllib2.urlopen('https://httpbin.org/response-headers?myheader=myvalue')

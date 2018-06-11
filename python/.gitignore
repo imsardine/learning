@@ -1,3 +1,7 @@
-venv-python/
 *.pyc
-__pycache__/
+/venv/
+
+# pytest, tox
+/.pytest_cache/
+/.tox/
+/learning_python.egg-info

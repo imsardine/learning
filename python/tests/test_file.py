@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os, sys
 from os import path
-from StringIO import StringIO
+import pytest
 
 def test_getcwd_chdir():
     # https://docs.python.org/2/library/os.html#os.getcwd
@@ -21,6 +21,7 @@ def test_type_testing_file(tmpdir):
         assert isinstance(f, file)
 
 def test_stringio_is_not_file_but_filelike():
+    from StringIO import StringIO
     io = StringIO()
 
     assert not isinstance(io, file)
@@ -29,7 +30,7 @@ def test_stringio_is_not_file_but_filelike():
     assert hasattr(io, 'read')
     assert hasattr(io, 'write')
 
-def test_directory_traversing__topdown(datafile):
+def test_directory_traversing__topdown(testdata):
     # tree
     # ├── ignore
     # │   └── file-ignore.ext
@@ -42,7 +43,7 @@ def test_directory_traversing__topdown(datafile):
     # │       └── .keep
     # └── subdir2
     #     └── file2-1.ext
-    top = datafile.abspath('data/tree')
+    top = testdata.abspath('data/tree')
     dirs, files = [], [] # in order
     for dirpath, dirnames, filenames in os.walk(top):
         dirs.append(path.basename(dirpath))

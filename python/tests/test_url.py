@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import urllib, re
-import urlparse
 import pytest
 
 def test_url_encode__mapping():
@@ -13,6 +12,8 @@ def test_url_encode__mapping():
     ]
 
 def test_url_decode__dict():
+    import urlparse
+
     query_string = 'key=value&dt=2018-03-20T17%3A00%3A00%2B08%3A00'
     params = urlparse.parse_qs(query_string)
 
@@ -22,6 +23,8 @@ def test_url_decode__dict():
     }
 
 def test_url_decode__list():
+    import urlparse
+
     query_string = 'key=value&dt=2018-03-20T17%3A00%3A00%2B08%3A00'
     params = urlparse.parse_qsl(query_string)
 

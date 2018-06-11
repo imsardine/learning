@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-from HTMLParser import HTMLParser
+import sys
+py2 = sys.version_info[0] == 2
+
+if py2:
+    from HTMLParser import HTMLParser
+else:
+    from html.parser import HTMLParser
+
 from textwrap import dedent
 
 def test_htmlparser():
@@ -8,9 +15,11 @@ def test_htmlparser():
           <meta name='author' content="傑洛米高">
           <meta name='description' content="&lt;HTML&gt;" />
         <html>""")
+    if py2:
+        html = html.decode('utf-8') # feed(unicode) is advised
 
     parser = HTMLMetaParser()
-    parser.feed(html.decode('utf-8'))
+    parser.feed(html)
 
     assert parser.entries == {
         'author': u'傑洛米高',
