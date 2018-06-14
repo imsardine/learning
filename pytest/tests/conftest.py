@@ -35,25 +35,9 @@ class CommandLine(object):
         self.workdir = workdir
 
     def run(self, cmdline, err_expected=False):
-        _cwd = os.getcwd()
-        assert path.isabs(_cwd), _cwd
-
         os.chdir(self.workdir)
-        try:
-            p = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True)
-
-            out, err = p.communicate()
-            if p.returncode != 0 and not err_expected:
-                print(out, file=sys.stdout)
-                print(err, file=sys.stderr)
-                raise CalledProcessError(p.returncode, cmdline)
-            elif p.returncode == 0 and err_expected:
-                assert False, 'Error expected!'
-
-            return CommandLineResult(
-                out.decode('utf-8'), err.decode('utf-8'), p.returncode)
-        finally:
-            os.chdir(_cwd)
+        p = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True)
+        return ProcessContext(p, err_expected)
 
     def run_err(self, cmdline):
         return self.run(cmdline, err_expected=True)
@@ -88,12 +72,55 @@ class CommandLine(object):
 
         return dedent(match.group('content'))
 
-class CommandLineResult(object):
+class ProcessContext(object):
 
-    def __init__(self, out, err, rc):
-        self.out = out
-        self.err = err
-        self.rc = rc
+    def __init__(self, popen, err_expected):
+        self._popen = popen
+        self._err_expected = err_expected
+
+        self._returned = False
+        self._out = self._err = ''
+        self._rc = 0
+
+    @property
+    def rc(self):
+        self._wait_to_terminate()
+        return self._rc
+
+    @property
+    def out(self):
+        self._wait_to_terminate()
+        return self._out
+
+    @property
+    def err(self):
+        self._wait_to_terminate()
+        return self._err
+
+    def _wait_to_terminate(self):
+        if self._returned:
+            return
+
+        p = self._popen
+
+        out, err = p.communicate()
+        self._out = out.decode('utf-8')
+        self._err = err.decode('utf-8')
+        self._rc = p.returncode
+        self._returned = True
+
+        if p.returncode != 0 and not self._err_expected:
+            print(self._out, file=sys.stdout)
+            print(self._err, file=sys.stderr)
+            raise CalledProcessError(p.returncode, cmdline)
+        elif p.returncode == 0 and self._err_expected:
+            assert False, 'Error expected!'
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._popen.terminate()
 
 @pytest.fixture
 def testdata(request):
