@@ -28,19 +28,38 @@ class DataFileHelper(object):
 
 INDENTED_LITERAL = re.compile(r'^\n?(?P<content>.*)\n?\s*$', re.DOTALL)
 
-class CommandLine(object):
+class Shell(object):
 
     def __init__(self, workdir):
         print('WORKDIR = %s' % workdir, file=sys.stderr)
         self.workdir = workdir
 
     def run(self, cmdline, err_expected=False):
+        _cwd = os.getcwd()
+        assert path.isabs(_cwd), _cwd
+
         os.chdir(self.workdir)
-        p = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True)
-        return ProcessContext(p, err_expected)
+        try:
+            p = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True)
+
+            out, err = p.communicate()
+            if p.returncode != 0 and not err_expected:
+                print(out, file=sys.stdout)
+                print(err, file=sys.stderr)
+                raise CalledProcessError(p.returncode, cmdline)
+            elif p.returncode == 0 and err_expected:
+                assert False, 'Error expected!'
+
+            return ShellRunResult(
+                out.decode('utf-8'), err.decode('utf-8'), p.returncode)
+        finally:
+            os.chdir(_cwd)
 
     def run_err(self, cmdline):
         return self.run(cmdline, err_expected=True)
+
+    def spawn(self, cmdline):
+        return PexpectSpawnContext(cmdline, self.workdir)
 
     def src(self, pathname, content='', encoding='utf-8'):
         pathname = self._abspath(pathname)
@@ -72,55 +91,82 @@ class CommandLine(object):
 
         return dedent(match.group('content'))
 
-class ProcessContext(object):
+class ShellRunResult(object):
 
-    def __init__(self, popen, err_expected):
-        self._popen = popen
-        self._err_expected = err_expected
+    def __init__(self, out, err, rc):
+        self.out = out
+        self.err = err
+        self.rc = rc
 
-        self._returned = False
-        self._out = self._err = ''
-        self._rc = 0
+class PexpectSpawnContext(object):
 
-    @property
-    def rc(self):
-        self._wait_to_terminate()
-        return self._rc
-
-    @property
-    def out(self):
-        self._wait_to_terminate()
-        return self._out
-
-    @property
-    def err(self):
-        self._wait_to_terminate()
-        return self._err
-
-    def _wait_to_terminate(self):
-        if self._returned:
-            return
-
-        p = self._popen
-
-        out, err = p.communicate()
-        self._out = out.decode('utf-8')
-        self._err = err.decode('utf-8')
-        self._rc = p.returncode
-        self._returned = True
-
-        if p.returncode != 0 and not self._err_expected:
-            print(self._out, file=sys.stdout)
-            print(self._err, file=sys.stderr)
-            raise CalledProcessError(p.returncode, cmdline)
-        elif p.returncode == 0 and self._err_expected:
-            assert False, 'Error expected!'
+    def __init__(self, cmdline, workdir):
+        self._cmdline = cmdline
+        self._workdir = workdir
+        self._child = None
 
     def __enter__(self):
+        import pexpect
+
+        os.chdir(self._workdir)
+        self._child = pexpect.spawn( # unicode mode
+            'bash', ['-c', self._cmdline], encoding='utf-8')
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._popen.terminate()
+        self._child.terminate(force=True)
+
+    def expect(self, pattern, timeout=10):
+        pattern = self._to_unicode(pattern)
+        return self._child.expect(pattern, timeout=timeout)
+
+    def expect_exact(self, pattern, timeout=10):
+        pattern = self._to_unicode(pattern)
+        return self._child.expect_exact(pattern, timeout=timeout)
+
+    def expect_eof(self, timeout=10):
+        import pexpect
+        return self._child.expect(pexpect.EOF, timeout=timeout)
+
+    def send(self, s):
+        s = self._to_unicode(s)
+        return self._child.send(s)
+
+    def sendline(self, s=''):
+        s = self._to_unicode(s)
+        return self._child.sendline(s)
+
+    def _to_unicode(self, s):
+        if sys.version_info[0] >= 3:
+            if isinstance(s, bytes):
+                return s.decode('utf-8')
+            elif isinstance(s, str):
+                return s
+            else:
+                assert False, s
+        else:
+            if isinstance(s, str):
+                return s.decode('utf-8')
+            elif isinstance(s, unicode):
+                return s
+            else:
+                assert False, s
+
+    @property
+    def before(self):
+        return self._to_unix_newline(self._child.before)
+
+    @property
+    def after(self):
+        return self._to_unix_newline(self._child.after)
+
+    def _to_unix_newline(self, tty_output):
+        return tty_output.replace('\r\n', '\n')
+
+    @property
+    def match(self):
+        return self._child.match
 
 @pytest.fixture
 def testdata(request):
@@ -128,6 +174,6 @@ def testdata(request):
     return DataFileHelper(base_dir)
 
 @pytest.fixture
-def cli(tmpdir):
-    return CommandLine(tmpdir.strpath)
+def shell(tmpdir):
+    return Shell(tmpdir.strpath)
 

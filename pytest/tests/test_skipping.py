@@ -16,10 +16,10 @@ TEST_SKIPPING_PY = """
         pass
     """
 
-def test_skipping__no_extra_summary(cli):
-    cli.src('test_skipping.py', TEST_SKIPPING_PY)
+def test_skipping__no_extra_summary(shell):
+    shell.src('test_skipping.py', TEST_SKIPPING_PY)
 
-    r = cli.run('pytest -v')
+    r = shell.run('pytest -v')
     assert r.out == like("""
     ... collected 3 items
 
@@ -30,11 +30,11 @@ def test_skipping__no_extra_summary(cli):
     =============== 1 skipped, 1 xfailed, 1 xpassed in ...
     """)
 
-def test_skipping__with_extra_summary(cli):
-    cli.src('test_skipping.py', TEST_SKIPPING_PY)
+def test_skipping__with_extra_summary(shell):
+    shell.src('test_skipping.py', TEST_SKIPPING_PY)
 
     # -ra, where 'a' stands for (a)ll except passed
-    r = cli.run('pytest -v -ra')
+    r = shell.run('pytest -v -ra')
 
     assert r.out == like("""
     ... collected 3 items
