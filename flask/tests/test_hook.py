@@ -6,10 +6,6 @@ def test_teardown_appcontext():
     appcontext_called = []
     request_called = []
 
-    @app.route('/')
-    def index():
-        return ''
-
     @app.teardown_appcontext
     def on_appcontext_ends(exc):
         appcontext_called.append(True)

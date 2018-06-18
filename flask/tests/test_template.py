@@ -17,7 +17,7 @@ def test_undefined_variable__no_error():
     # value. What you can do with that kind of value depends on the application
     # configuration: the default behavior is to evaluate to an empty string if
     # printed or iterated over, and to fail for every other operation.
-    assert resp.data == 'foo = []'
+    assert resp.data == b'foo = []'
 
 def test_undefined_variable__strict__raise_error(capsys):
     app = Flask(__name__)
@@ -34,5 +34,6 @@ def test_undefined_variable__strict__raise_error(capsys):
     resp = app.test_client().get('/')
 
     assert resp.status_code == 500
-    assert "UndefinedError: 'bar' is undefined" in capsys.readouterr()[1]
+    out, err = capsys.readouterr()
+    assert "UndefinedError: 'bar' is undefined" in err, (out, err)
 
