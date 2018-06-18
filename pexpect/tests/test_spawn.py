@@ -37,6 +37,34 @@ def test_stderr_in_output(cli):
     """)
 
     child = pexpect.spawn('python hello.py', encoding='utf-8')
-    child.expect(u'Hello, World!')
+    child.expect_exact(u'Hello, World!')
 
     assert child.before == "WHO defaults to 'World'.\r\n"
+
+def test_pattern_not_found__eof__raise_eof_exception(cli):
+    cli.src('hello.py', '''
+        from __future__ import print_function
+        print('Hello, World!')
+    ''')
+
+    child = pexpect.spawn('python hello.py', encoding='utf-8')
+    child.expect_exact(u'Hello, World!')
+
+    # no more non-whitespace output
+    with pytest.raises(pexpect.EOF):
+        child.expect(ur'\S', timeout=1)
+
+def test_pattern_not_found__no_eof__raise_timeout_exception(cli):
+    cli.src('hello.py', '''
+        from __future__ import print_function
+        print('Hello, World!')
+
+        import time; time.sleep(2) # > 1s
+    ''')
+
+    child = pexpect.spawn('python hello.py', encoding='utf-8')
+    child.expect_exact(u'Hello, World!')
+
+    # no more non-whitespace output
+    with pytest.raises(pexpect.TIMEOUT):
+        child.expect(ur'\S', timeout=1)
