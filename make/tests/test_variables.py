@@ -57,3 +57,32 @@ def test_target_specific_variable__in_effect_prerequisites(shell):
         prerequisite: VAR1 = value1, VAR2 = value2 (custom), VAR3 = value3
         target: VAR1 = value1, VAR2 = value2
     """)
+
+def test_multiline_variable__implicit_assignment_operator(shell):
+    shell.src('Makefile', """
+    define CONTENT
+        line 1
+      line 2 (indented)
+    endef
+
+    target:
+    	@echo -n
+    	$(info [$(CONTENT)])
+    """)
+
+    # the trailing newline is not part of the value
+    assert shell.run('make').out == '[    line 1\n  line 2 (indented)]\n'
+
+def test_multiline_variable__explicit_assignment_operator__unexpected_empty(shell):
+    shell.src('Makefile', """
+    define CONTENT =
+        line 1
+      line 2 (indented)
+    endef
+
+    target:
+    	@echo -n
+    	$(info [$(CONTENT)])
+    """)
+
+    assert shell.run('make').out == '[]\n'
