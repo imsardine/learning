@@ -60,14 +60,14 @@ def test_target_specific_variable__in_effect_prerequisites(shell):
 
 def test_multiline_variable__implicit_assignment_operator(shell):
     shell.src('Makefile', """
-    define CONTENT
+    define VAR
         line 1
       line 2 (indented)
     endef
 
     target:
     	@echo -n
-    	$(info [$(CONTENT)])
+    	$(info [$(VAR)])
     """)
 
     # the trailing newline is not part of the value
@@ -75,14 +75,28 @@ def test_multiline_variable__implicit_assignment_operator(shell):
 
 def test_multiline_variable__explicit_assignment_operator__unexpected_empty(shell):
     shell.src('Makefile', """
-    define CONTENT =
+    define VAR =
         line 1
       line 2 (indented)
     endef
 
     target:
     	@echo -n
-    	$(info [$(CONTENT)])
+    	$(info [$(VAR)])
     """)
 
     assert shell.run('make').out == '[]\n'
+
+def test_multiline_variable__as_canned_recipes(shell):
+    shell.src('Makefile', """
+    define COMMANDS
+    @echo step 1
+    	@echo step 2
+    endef
+
+    target:
+    	$(COMMANDS)
+    """)
+
+    # inconsistent indentation doesn't matter
+    assert shell.run('make').out == 'step 1\nstep 2\n'
