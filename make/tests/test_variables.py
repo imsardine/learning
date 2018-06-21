@@ -1,5 +1,19 @@
 from textwrap import dedent
 
+def test_variable__empty_string(shell):
+    shell.src('Makefile', """
+    IMPLICIT_EMPTY =
+    EXPLICIT_EMPTY = ''
+
+    target:
+    	@echo -n
+    	$(info Implicit = [$(IMPLICIT_EMPTY)])
+    	$(info Explicit = [$(EXPLICIT_EMPTY)])
+    """)
+
+    # Value `''` doesn't mean empty string to make itself
+    assert shell.run('make').out == "Implicit = []\nExplicit = ['']\n"
+
 def test_target_specific_variable(shell):
     shell.src('Makefile', """
     VAR = global
