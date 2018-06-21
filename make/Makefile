@@ -1,5 +1,5 @@
 TEST ?= tests/
-VENV_DIR = $(PWD)/venv-make
+VENV_DIR = $(PWD)/venv
 
 setup:
 	virtualenv $(VENV_DIR)
