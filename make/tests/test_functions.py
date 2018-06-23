@@ -10,7 +10,7 @@ def test_user_defined_function(shell):
 
     assert shell.run('make').out == 'Hello, World!'
 
-def test_user_defined_function__whitespaces_in_arguemnts(shell):
+def test_user_defined_function__whitespaces_between_args_matter(shell):
     shell.src('Makefile', """
     define echo
     	@echo -n '[$(1)]' '[$(2)]' '[$(3)]'
