@@ -11,7 +11,7 @@ test:
 	PATH=$(VENV_DIR)/bin:$(PATH) tox
 
 test-py2:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox -e py2
+	PATH=$(VENV_DIR)/bin:$(PATH) tox -e "py2-flask{0,1}"
 
 test-py3:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox -e py3
+	PATH=$(VENV_DIR)/bin:$(PATH) tox -e "py3-flask{0,1}"
