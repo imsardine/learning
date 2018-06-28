@@ -28,6 +28,18 @@ class DataFileHelper(object):
 
 INDENTED_LITERAL = re.compile(r'^\n?(?P<content>.*)\n?\s*$', re.DOTALL)
 
+def _dedent(content):
+    match = INDENTED_LITERAL.match(content)
+    assert match, content
+
+    # dedent
+    lines = dedent(match.group('content')).splitlines()
+
+    # remove leading '|'
+    if all(map(lambda x: x.startswith('|'), lines)):
+        lines = map(lambda x: x[1:], lines)
+    return '\n'.join(lines)
+
 class Shell(object):
 
     def __init__(self, workdir):
@@ -69,7 +81,7 @@ class Shell(object):
             os.makedirs(dirname)
 
         with open(pathname, 'wb') as f:
-            f.write(self._trim(content).encode(encoding))
+            f.write(_dedent(content).encode(encoding))
 
     def exists(self, pathname):
         dir_expected = pathname.endswith('/')
@@ -84,12 +96,6 @@ class Shell(object):
         if not path.isabs(pathname):
             pathname = path.join(self.workdir, pathname)
         return pathname
-
-    def _trim(self, content):
-        match = INDENTED_LITERAL.match(content)
-        assert match, content
-
-        return dedent(match.group('content'))
 
 class ShellRunResult(object):
 
@@ -119,11 +125,23 @@ class PexpectSpawnContext(object):
 
     def expect(self, pattern, timeout=10):
         pattern = self._to_unicode(pattern)
-        return self._child.expect(pattern, timeout=timeout)
 
-    def expect_exact(self, pattern, timeout=10):
+        try:
+            return self._child.expect(pattern, timeout=timeout)
+        except Exception:
+            print(repr(self.before), file=sys.stderr)
+            raise
+
+    def expect_exact(self, pattern, timeout=10, dedent=True):
         pattern = self._to_unicode(pattern)
-        return self._child.expect_exact(pattern, timeout=timeout)
+
+        try:
+            return self._child.expect_exact(
+                self._to_tty_newline(_dedent(pattern) if dedent else pattern),
+                timeout=timeout)
+        except Exception:
+            print(repr(self.before), file=sys.stderr)
+            raise
 
     def expect_eof(self, timeout=10):
         import pexpect
@@ -164,6 +182,9 @@ class PexpectSpawnContext(object):
     def _to_unix_newline(self, tty_output):
         return tty_output.replace('\r\n', '\n')
 
+    def _to_tty_newline(self, string):
+        return string.replace('\n', '\r\n')
+
     @property
     def match(self):
         return self._child.match
@@ -176,4 +197,3 @@ def testdata(request):
 @pytest.fixture
 def shell(tmpdir):
     return Shell(tmpdir.strpath)
-
