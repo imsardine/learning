@@ -19,7 +19,7 @@ def test_undefined_variable__no_error():
     # printed or iterated over, and to fail for every other operation.
     assert resp.data == b'foo = []'
 
-def test_undefined_variable__strict__raise_error(capsys):
+def test_undefined_variable__strict__raise_error(capsys, caplog, flask_ver):
     app = Flask(__name__)
 
     # http://jinja.pocoo.org/docs/2.10/api/#undefined-types
@@ -32,8 +32,11 @@ def test_undefined_variable__strict__raise_error(capsys):
         return render_template_string('foo = [{{bar}}]', foo='blabla')
 
     resp = app.test_client().get('/')
-
     assert resp.status_code == 500
+
     out, err = capsys.readouterr()
-    assert "UndefinedError: 'bar' is undefined" in err, (out, err)
+    log = caplog.text
+    dest = err if flask_ver[0] == 0 else log # Flask 1.x write errors as logs
+
+    assert "UndefinedError: 'bar' is undefined" in dest, (out, err, log)
 

@@ -198,9 +198,15 @@ def testdata(request):
 def shell(tmpdir):
     return Shell(tmpdir.strpath)
 
+import flask
 from myapp import create_app
 
 @pytest.fixture
 def client():
     app = create_app()
     return app.test_client()
+
+@pytest.fixture
+def flask_ver():
+    return tuple(map(int, flask.__version__.split('.')))
+

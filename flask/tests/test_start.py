@@ -1,7 +1,7 @@
 import requests
 import pytest
 
-def test_hello_world(shell):
+def test_hello_world(shell, flask_ver):
     shell.src('hello.py', """
     from flask import Flask
     app = Flask(__name__)
@@ -12,8 +12,7 @@ def test_hello_world(shell):
     """)
 
     import flask
-    version = tuple(map(int, flask.__version__.split('.')))
-    if version[0] == 0: # 0.x
+    if flask_ver[0] == 0: # 0.x
         message = """
         | * Serving Flask app "hello"
         | * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
