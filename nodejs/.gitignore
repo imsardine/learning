@@ -1,1 +1,8 @@
-node_modules/
+*.pyc
+/venv/
+
+# tox, pytest
+/.tox/
+/.cache/
+/.pytest_cache/
+/*.egg-info/
