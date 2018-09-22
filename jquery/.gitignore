@@ -1,0 +1,11 @@
+*.pyc
+/tmp/
+
+# tox, pytest
+/.tox/
+/.cache/
+/.pytest_cache/
+
+# node
+/node_modules/
+/package-lock.json
