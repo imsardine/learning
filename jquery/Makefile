@@ -1,4 +1,5 @@
 TEST ?= tests/
+TEST_ENVS ?=
 
 docker_image = learning-jquery.local
 docker_opts = --env NODE_PATH=/workspace/node_modules
@@ -19,6 +20,10 @@ setup:
 shell:
 	$(call docker_run)
 
+test: docker_opts += --env TEST=$(TEST)
+test: docker_opts += --env TOXENV=$(TEST_ENVS)
 test:
 	$(call docker_run,tox)
 
+clean:
+	git clean -Xdf
