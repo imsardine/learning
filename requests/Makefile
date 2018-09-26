@@ -1,17 +1,28 @@
-VENV_DIR = $(PWD)/venv
-export TEST ?= tests/
-export PYTHONDONTWRITEBYTECODE = 1
-export TOX_TESTENV_PASSENV = PYTHONDONTWRITEBYTECODE
+TEST ?= tests/
+TEST_ENVS ?=
+
+docker_image = learning-requests.local
+docker_opts =
+
+define docker_run
+	docker run --rm -it \
+	  --volume $(PWD):/workspace \
+	  --volume $(PWD)/tmp:/tmp \
+	  $(docker_opts) \
+	  $(docker_image) $(1)
+endef
 
 setup:
-	virtualenv $(VENV_DIR)
-	$(VENV_DIR)/bin/pip install tox==3.1.2
+	docker build -t $(docker_image) .
+	$(call docker_run,tox --notest)
 
+shell:
+	$(call docker_run)
+
+test: docker_opts += --env TEST=$(TEST)
+test: docker_opts += --env TOXENV=$(TEST_ENVS)
 test:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox
+	$(call docker_run,tox)
 
-test-py2:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox -e py2
-
-test-py3:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox -e py3
+clean:
+	git clean -Xdf
