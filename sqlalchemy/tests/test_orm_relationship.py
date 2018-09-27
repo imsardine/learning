@@ -40,3 +40,40 @@ def test_insert():
     email2 = Address(email_address='imsardine@simplbug.com', user=user)
     assert email2 in user.addresses
 
+@pytest.mark.mysql
+def test_orm_without_fk_constraints__mysql(mysql_engine):
+    conn = mysql_engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute("CREATE TABLE user (id INT NOT NULL AUTO_INCREMENT, name CHAR(20) NOT NULL, PRIMARY KEY (id));")
+        conn.execute("CREATE TABLE address (id INT NOT NULL AUTO_INCREMENT, user_id INT NOT NULL, email_address VARCHAR(50), PRIMARY KEY (id));")
+        conn.execute("INSERT INTO user (id, name) VALUES (1, 'Jeremy');")
+        conn.execute("INSERT INTO address (id, user_id, email_address) VALUES (1, 1, 'imsardine@gmail.com'), (2, 1, 'jeremykao@kkbox.com')")
+        trans.commit()
+    except:
+        trans.rollback()
+        raise
+
+    # Start a new transaction implicitly
+    Session = sessionmaker(bind=mysql_engine)
+    session = Session()
+
+    try:
+        # Test ORM querying
+        jeremy = session.query(User).filter_by(id=1).one()
+        assert jeremy.name == 'Jeremy'
+        assert [addr.email_address for addr in jeremy.addresses] == \
+                ['imsardine@gmail.com', 'jeremykao@kkbox.com']
+
+        judy = User(name='Judy')
+        judy.addresses.append(Address(email_address='imjudykao@gmail.com'))
+        session.add(judy)
+        session.commit()
+
+        # Test ORM writing
+        judy = session.query(User).filter_by(name='Judy').one()
+        assert [addr.email_address for addr in judy.addresses] == ['imjudykao@gmail.com']
+        assert judy.addresses[0].user is judy # backref
+    finally:
+        session.close()
+

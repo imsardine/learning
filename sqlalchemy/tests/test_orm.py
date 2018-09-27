@@ -20,9 +20,9 @@ def test_mapping_process():
     # Instrumented
     assert isinstance(User.id, sqlalchemy.orm.attributes.InstrumentedAttribute)
 
-    # Mappped
+    # Mapped
     assert Base.metadata is User.__table__.metadata
-    assert Base.metadata.tables == { 'user': User.__table__ }
+    assert Base.metadata.tables == { 'user': User.__table__ } # catalog
     assert create_table_sql(User.__table__, sqlite_dialect) == dedent("""\
         CREATE TABLE user (
         	id INTEGER NOT NULL, 

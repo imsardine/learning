@@ -205,3 +205,23 @@ def testdata(request):
 def workspace(tmpdir):
     return Workspace(tmpdir.strpath)
 
+@pytest.fixture
+def mysql_engine():
+    params = {
+        'host': 'mysql',
+        'user': os.environ['MYSQL_USER'],
+        'passwd': os.environ['MYSQL_PASSWORD'],
+        'db': os.environ['MYSQL_DB'],
+    }
+
+    from sqlalchemy import create_engine
+    db_url = 'mysql+pymysql://%(user)s:%(passwd)s@%(host)s/%(db)s' % params
+    engine = create_engine(db_url, echo=True)
+    yield engine
+
+    # DROP all tables and reset AUTO_INCREMENT value
+    conn = engine.connect()
+    result = conn.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='%(db)s'" % params)
+    for row in result:
+        table_name = row[0]
+        conn.execute("DROP TABLE %s;" % table_name)
