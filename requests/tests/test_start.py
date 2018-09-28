@@ -4,13 +4,13 @@ import pytest
 
 def test_hello_world():
     query_string = {'greeting': 'Hello, World!'}
-    resp = requests.get('https://httpbin.org/get', params=query_string)
+    resp = requests.get('http://httpbin/get', params=query_string)
     resp.raise_for_status() # best practice
 
     assert resp.json()['args']['greeting'] == 'Hello, World!'
 
 def test_http_error__exception_not_raised_immediately():
-    resp = requests.get('https://httpbin.org/status/500')
+    resp = requests.get('http://httpbin/status/500')
 
     # no exception raised
     assert resp.status_code == 500
