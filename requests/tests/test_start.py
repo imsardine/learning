@@ -9,18 +9,17 @@ def test_hello_world():
 
     assert resp.json()['args']['greeting'] == 'Hello, World!'
 
-def test_http_error__exception_not_raised_immediately():
+def test_http_error__exception_not_raised_immediately(py2):
     resp = requests.get('http://httpbin/status/500')
 
     # no exception raised
     assert resp.status_code == 500
 
     # non-200 response may cause subsequent exceptions
-    err = [
-        'No JSON object could be decoded',
+    err = 'No JSON object could be decoded' if py2 else \
         'Expecting value: line 1 column 1 (char 0)'
-    ][int(sys.version_info[0] >= 3)]
 
     with pytest.raises(ValueError) as excinfo:
         resp.json()
     assert str(excinfo.value) == err
+
