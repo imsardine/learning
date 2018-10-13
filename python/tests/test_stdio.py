@@ -1,9 +1,7 @@
+from . import *
 import os, sys
 import pexpect
 import pytest
-
-py2_only = pytest.mark.skipif(sys.version_info[0] >= 3, reason='Python 2')
-py3_later = pytest.mark.skipif(sys.version_info[0] <= 2, reason='Python 3+')
 
 @py2_only
 def test_keyboard_input_py2(workspace):
