@@ -20,7 +20,7 @@ def test_get_filelist_without_extraction(testdata):
 def test_read_file_without_extraction(testdata):
     zipfile = testdata.abspath('data/zip/sample.zip')
     content = ZipFile(zipfile).read('dir1/file1-1.txt')
-    assert content == 'file1-1\ncontent\ncontent\ncontent\n'
+    assert content == b'file1-1\ncontent\ncontent\ncontent\n'
 
 def test_extract_all(testdata, tmpdir):
     zipfile = testdata.abspath('data/zip/sample.zip')
@@ -90,7 +90,7 @@ def test_archive__deflate_compression(testdata, tmpdir):
         assert info.compress_type == ZIP_DEFLATED
         assert info.file_size > info.compress_size
 
-        assert zf.read(info.filename) == 'file1-1\ncontent\ncontent\ncontent\n'
+        assert zf.read(info.filename) == b'file1-1\ncontent\ncontent\ncontent\n'
 
 def test_archive__shutil_make_archive(testdata, tmpdir):
     srcdir = testdata.relpath('data/zip/content')
@@ -100,8 +100,12 @@ def test_archive__shutil_make_archive(testdata, tmpdir):
 
     with ZipFile(zfn) as zf:
         assert sorted(zf.namelist()) == [ # no dir entries
+            'dir1/',
+            'dir1/dir1-1/',
+            'dir1/dir1-2/',
             'dir1/file1-1.txt',
             'dir1/file1-2.txt',
+            'dir2/',
             'dir2/file2-1.txt',
             'dir2/file2-2.txt',
             'file1.txt',
@@ -116,4 +120,4 @@ def test_archive__shutil_make_archive(testdata, tmpdir):
         assert info.compress_type == ZIP_DEFLATED
         assert info.file_size > info.compress_size
 
-        assert zf.read(info.filename) == 'file1-1\ncontent\ncontent\ncontent\n'
+        assert zf.read(info.filename) == b'file1-1\ncontent\ncontent\ncontent\n'

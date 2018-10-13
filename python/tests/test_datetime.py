@@ -3,21 +3,23 @@ import json
 import pytz
 import pytest
 
-def test_date_not_json_serializable():
+def test_date_not_json_serializable(py2):
     dt = date(2018, 1, 2)
     with pytest.raises(TypeError) as excinfo:
         json.dumps(dt)
 
-    assert excinfo.value.message == \
-            'datetime.date(2018, 1, 2) is not JSON serializable'
+    assert str(excinfo.value) == \
+        'datetime.date(2018, 1, 2) is not JSON serializable' if py2 else \
+        'Object of type date is not JSON serializable'
 
-def test_datetime_not_json_serializable():
+def test_datetime_not_json_serializable(py2):
     dt = datetime(2018, 1, 2, 13, 50)
     with pytest.raises(TypeError) as excinfo:
         json.dumps(dt)
 
-    assert excinfo.value.message == \
-            'datetime.datetime(2018, 1, 2, 13, 50) is not JSON serializable'
+    assert str(excinfo.value) == \
+        'datetime.datetime(2018, 1, 2, 13, 50) is not JSON serializable' if py2 else \
+        'Object of type date is not JSON serializable'
 
 def test_default_serializer():
     def default(obj):

@@ -22,9 +22,9 @@ def test_urlopen__return_file_like():
 
     # file-like
     assert json.loads(resp.read()) == {
-        'Content-Length': '79',
-        'Content-Type': 'application/json',
-        'myheader': 'myvalue'
+        'Content-Length': '94',
+        'Content-Type': u'application/json',
+        'myheader': u'myvalue'
     }
 
 def test_urlopen__non_200_response__http_error():
@@ -40,7 +40,7 @@ def test_urlopen__invalid_host__url_error():
 
     # https://docs.python.org/2/library/socket.html#socket.gaierror
     cause = e.value.reason
-    assert cause.args == (8, 'nodename nor servname provided, or not known')
+    assert cause.args == (-2, 'Name or service not known')
 
 def test_urlopen__redirection():
     resp = urllib2.urlopen('https://httpbin.org/redirect-to?' + urllib.urlencode({

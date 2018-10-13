@@ -15,16 +15,22 @@ def test_getcwd_chdir():
     finally:
         os.chdir(cwd)
 
-def test_type_testing_file(tmpdir):
+def test_type_testing_file(tmpdir, py2):
+    if py2:
+        filetype = file
+    else:
+        from io import IOBase as filetype
+
     # https://docs.python.org/2.7/library/functions.html#file
     with open(path.join(tmpdir.strpath, 'file.ext'), 'w') as f:
-        assert isinstance(f, file)
+        assert isinstance(f, filetype)
 
-def test_stringio_is_not_file_but_filelike():
-    from StringIO import StringIO
+def test_stringio_is_filelike(py2):
+    if py2:
+        from StringIO import StringIO
+    else:
+        from io import StringIO
     io = StringIO()
-
-    assert not isinstance(io, file)
 
     # https://docs.python.org/3/glossary.html#term-file-like-object
     assert hasattr(io, 'read')

@@ -1,7 +1,11 @@
 import types
 
-def test_none_singleton():
-    assert isinstance(None, types.NoneType)
+def test_none_singleton(py2):
+    if py2:
+        assert isinstance(None, types.NoneType)
+    else:
+        # https://stackoverflow.com/questions/21706609
+        assert type(None)() is None
 
 class Negator(object):
 
