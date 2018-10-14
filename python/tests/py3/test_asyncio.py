@@ -5,26 +5,41 @@ def test_hello_world(workspace):
     workspace.src('main.py', r"""
     import asyncio
 
-    async def main():
+    async def do_something_else():
+        print('...', end='')
+        await asyncio.sleep(1)
+        print('!', end='')
+
+    async def say_hello_async(who):
         print('Hello, ', end='')
         await asyncio.sleep(1)
-        print('World!')
+        print(who, end='')
 
-    # Python 3.7+
+    async def main():
+        await asyncio.gather(say_hello_async('World'), do_something_else())
+
     asyncio.run(main())
     """)
 
     r = workspace.run('python main.py')
-    assert r.out == 'Hello, World!'
+    assert r.out == 'Hello, ...World!'
 
 @pytest.mark.asyncio
-async def test_hello_world__pytest_asyncio(workspace):
-    result = await async_task('World')
-    assert result == 'Hello, World!'
+async def test_hello_world__pytest_asyncio(capsys):
+    async def do_something_else():
+        print('...', end='')
+        await asyncio.sleep(1)
+        print('!', end='')
 
-async def async_task(input):
-    await asyncio.sleep(1)
-    return 'Hello, %s!' % input
+    async def say_hello_async(who):
+        print('Hello, ', end='')
+        await asyncio.sleep(1)
+        print(who, end='')
+
+    await asyncio.gather(say_hello_async('World'), do_something_else())
+
+    out, _ = capsys.readouterr()
+    assert out == 'Hello, ...World!'
 
 def test_import_asyncio_not_needed_for_using_async_await_keywords(workspace):
     workspace.src('main.py', r"""
