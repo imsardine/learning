@@ -1,13 +1,16 @@
 from flask import Flask, request, abort, jsonify
+from .config import Config
+
+config = Config()
 app = Flask(__name__)
 
 @app.route('/hello', methods=['GET', 'POST'])
-def hello():
+def hello_():
     # Slack may occasionally send a simple GET request to verify the URL and certificate.
     if request.method == 'GET' and request.args.get('ssl_check', None):
         return
 
-    if request.form['token'] != '...':
+    if request.form['token'] != config.verification_token:
         abort(401) # Unauthorized
 
     user = request.form['user_name']
@@ -15,7 +18,7 @@ def hello():
     args = request.form['text']
 
     text = 'Hello, %s! Hello, World!' % user
-    attached = { 'text': 'And here is the original command:\n%s %s' % (cmd, args) }
+    attached = {'text': 'And here is the original command:\n%s %s' % (cmd, args)}
 
     return jsonify({ 'text': text, 'attachments': [attached]})
 
