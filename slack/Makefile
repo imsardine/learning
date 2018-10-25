@@ -12,7 +12,9 @@ docker_image = learning-slack.local
 docker_opts =
 pytest_opts = -vvv -o log_cli=true
 
-docker_opts += --env VERIFICATION_TOKEN=$(VERIFICATION_TOKEN)
+docker_opts += --env SLACK_VERIFICATION_TOKEN=$(SLACK_VERIFICATION_TOKEN)
+docker_opts += --env SLACK_SIGNING_SECRET=$(SLACK_SIGNING_SECRET)
+docker_opts += --env SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN)
 
 ifneq ($(TEST_MARK),)
   pytest_opts += -m '$(TEST_MARK)'
@@ -46,5 +48,5 @@ clean:
 slash-command: docker_opts += -p 8000:5000
 slash-command:
 	$(call docker_run,bash -c '\
-		FLASK_APP=learning_slack.hello \
+		FLASK_APP=learning_slack.hello FLASK_DEBUG=1 \
 		.tox/py3/bin/flask run --host 0.0.0.0')
