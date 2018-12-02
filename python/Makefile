@@ -7,7 +7,7 @@ TEST_MARK ?=
 
 # Internal Variables
 docker_image = learning-python.local
-docker_opts =
+docker_opts = --env TZ=Asia/Taipei
 pytest_opts = -vvv -o log_cli=true
 
 ifneq ($(TEST_MARK),)
