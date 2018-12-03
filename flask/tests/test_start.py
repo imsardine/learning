@@ -1,8 +1,8 @@
 import requests
 import pytest
 
-def test_hello_world(shell, flask_ver):
-    shell.src('hello.py', """
+def test_hello_world(workspace, flask_ver):
+    workspace.src('hello.py', """
     from flask import Flask
     app = Flask(__name__)
 
@@ -27,7 +27,7 @@ def test_hello_world(shell, flask_ver):
         | * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
         """
 
-    with shell.spawn('FLASK_APP=hello.py flask run') as p:
+    with workspace.spawn('FLASK_APP=hello.py flask run') as p:
         p.expect_exact(message)
 
         resp = requests.get('http://localhost:5000')

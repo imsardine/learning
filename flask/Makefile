@@ -1,17 +1,42 @@
-VENV_DIR = $(PWD)/venv
-export TEST ?= tests/
-export PYTHONDONTWRITEBYTECODE = 1
-export TOX_TESTENV_PASSENV = PYTHONDONTWRITEBYTECODE
+MAKEFLAGS=--warn-undefined-variables
+
+# Parameters
+-include Makefile.credentials
+-include Makefile.settings
+TEST ?= tests/
+TEST_ENVS ?=
+TEST_MARK ?=
+
+# Internal Variables
+docker_image = learning-flask.local
+docker_opts =
+pytest_opts = -vvv -o log_cli=true
+
+ifneq ($(TEST_MARK),)
+  pytest_opts += -m '$(TEST_MARK)'
+endif
+
+define docker_run
+	docker run --rm -it \
+	  --volume $(PWD):/workspace \
+	  --volume $(PWD)/tmp:/tmp \
+	  $(docker_opts) \
+	  $(docker_image) $(1)
+endef
 
 setup:
-	virtualenv $(VENV_DIR)
-	$(VENV_DIR)/bin/pip install tox==3.0.0
+	docker build -t $(docker_image) .
+	$(call docker_run,tox --notest)
 
+shell: docker_opts += --volume ~/.vimrc:/root/.vimrc
+shell:
+	$(call docker_run,)
+
+test: docker_opts += --env TEST=$(TEST)
+test: docker_opts += --env TOXENV=$(TEST_ENVS)
+test: docker_opts += --env PYTEST_OPTS="$(pytest_opts)"
 test:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox
+	$(call docker_run,tox)
 
-test-py2:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox -e "py2-flask{0,1}"
-
-test-py3:
-	PATH=$(VENV_DIR)/bin:$(PATH) tox -e "py3-flask{0,1}"
+clean:
+	git clean -Xdf

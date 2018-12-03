@@ -40,11 +40,18 @@ def _dedent(content):
         lines = map(lambda x: x[1:], lines)
     return '\n'.join(lines)
 
-class Shell(object):
+class Workspace(object):
 
     def __init__(self, workdir):
         print('WORKDIR = %s' % workdir, file=sys.stderr)
         self.workdir = workdir
+        self._file_helper = DataFileHelper(workdir)
+
+    def read(self, fn, encoding=None):
+        return self._file_helper.read(fn, encoding)
+
+    def json(self, fn, encoding='utf-8'):
+        return self._file_helper.json(fn, encoding)
 
     def run(self, cmdline, err_expected=False):
         _cwd = os.getcwd()
@@ -100,9 +107,20 @@ class Shell(object):
 class ShellRunResult(object):
 
     def __init__(self, out, err, rc):
-        self.out = out
-        self.err = err
+        self._out = out
+        self._err = err
         self.rc = rc
+
+    @property
+    def out(self):
+        return self._trim_trailing_newline(self._out)
+
+    @property
+    def err(self):
+        return self._trim_trailing_newline(self._err)
+
+    def _trim_trailing_newline(self, txt):
+        return txt[0:-1] if txt[-1] == '\n' else txt
 
 class PexpectSpawnContext(object):
 
@@ -189,14 +207,18 @@ class PexpectSpawnContext(object):
     def match(self):
         return self._child.match
 
+@pytest.fixture(scope="session")
+def py2():
+    return sys.version_info[0] == 2
+
 @pytest.fixture
 def testdata(request):
     base_dir = path.dirname(request.module.__file__)
     return DataFileHelper(base_dir)
 
 @pytest.fixture
-def shell(tmpdir):
-    return Shell(tmpdir.strpath)
+def workspace(tmpdir):
+    return Workspace(tmpdir.strpath)
 
 import flask
 from myapp import create_app
