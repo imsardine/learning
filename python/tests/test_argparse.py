@@ -66,21 +66,22 @@ def test_subcmds__required_but_not_provided__raise_error():
         usage: cmd [-h] command ...
         cmd: error: the following arguments are required: command\n""")
 
-def test_argument_dependency():
-    class DependentArgumentParser(ArgumentParser):
+class DependentArgumentParser(ArgumentParser):
 
-        def parse_args(self, args=None, namespace=None):
-            args = super(DependentArgumentParser, self).parse_args(args, namespace)
+    def parse_known_args(self, args=None, namespace=None):
+        subnamespace, arg_strings = super(DependentArgumentParser, self) \
+                .parse_known_args(args, namespace)
 
-            validate = getattr(args, 'validate', None)
-            if not (validate and callable(validate)):
-                return args
-
+        validate = getattr(subnamespace, 'validate', None)
+        if validate and callable(validate):
             try:
-                validate(args)
+                validate(subnamespace)
             except ValueError as e:
                 self.error(str(e))
 
+        return subnamespace, arg_strings
+
+def test_argument_dependency__validation():
     def validate_args(args):
         if args.end_date <= args.start_date:
             raise ValueError('End date must be greater than the start date')
@@ -96,3 +97,69 @@ def test_argument_dependency():
     assert str(exc_info.value) == dedent("""\
         usage: cmd [-h] start_date end_date
         cmd: error: End date must be greater than the start date\n""")
+
+def test_argument_dependency__vaidation_with_subcmds():
+    def validate_args(args):
+        if args.end_date <= args.start_date:
+            raise ValueError('End date must be greater than the start date')
+
+    from dateutil import parser as date_parser
+    parser = DependentArgumentParser(prog='cmd')
+    subparsers = parser.add_subparsers(metavar='command')
+    subparser = subparsers.add_parser('subcmd')
+
+    subparser.set_defaults(validate=validate_args)
+    subparser.add_argument('start_date', type=date_parser.parse)
+    subparser.add_argument('end_date', type=date_parser.parse)
+
+    with pytest.raises(ValueError) as exc_info:
+        parser.parse_args(['subcmd', '2018-11-22', '2018-11-21'])
+    assert str(exc_info.value) == dedent("""\
+        usage: cmd subcmd [-h] start_date end_date
+        cmd subcmd: error: End date must be greater than the start date\n""")
+
+class HelpNeeded(Exception): pass
+
+class HelpAction(argparse._HelpAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        raise HelpNeeded(parser.format_help())
+
+def test_argument_dependency__help_message():
+    def validate_args(args):
+        if args.end_date <= args.start_date:
+            raise ValueError('End date must be greater than the start date')
+
+    from dateutil import parser as date_parser
+    parser = DependentArgumentParser(prog='cmd', add_help=False)
+    parser.add_argument('-h', '--help', action=HelpAction)
+    subparsers = parser.add_subparsers(metavar='command')
+    subparser = subparsers.add_parser('subcmd', add_help=False)
+
+    subparser.set_defaults(validate=validate_args)
+    subparser.add_argument('-h', '--help', action=HelpAction)
+    subparser.add_argument('start_date', type=date_parser.parse)
+    subparser.add_argument('end_date', type=date_parser.parse)
+
+    with pytest.raises(HelpNeeded) as exc_info:
+        parser.parse_args(['-h'])
+    assert str(exc_info.value) == dedent("""\
+        usage: cmd [-h] command ...
+
+        positional arguments:
+          command
+
+        optional arguments:
+          -h, --help\n""")
+
+    with pytest.raises(HelpNeeded) as exc_info:
+        parser.parse_args(['subcmd', '-h'])
+    assert str(exc_info.value) == dedent("""\
+        usage: cmd subcmd [-h] start_date end_date
+
+        positional arguments:
+          start_date
+          end_date
+
+        optional arguments:
+          -h, --help\n""")
