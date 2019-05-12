@@ -209,9 +209,9 @@ def workspace(tmpdir):
 def mysql_engine():
     params = {
         'host': 'mysql',
-        'user': os.environ['MYSQL_USER'],
-        'passwd': os.environ['MYSQL_PASSWORD'],
-        'db': os.environ['MYSQL_DB'],
+        'user': 'user',
+        'passwd': 'secret',
+        'db': 'db',
     }
 
     from sqlalchemy import create_engine
