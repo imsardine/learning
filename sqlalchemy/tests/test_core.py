@@ -1,3 +1,4 @@
+import re
 from tests import *
 from os import path
 from textwrap import dedent
@@ -90,3 +91,32 @@ def test_create_tables(tmpdir):
         	PRIMARY KEY (id)
         );""")
 
+def test_pooling__enabled_by_default_and_create_connections_on_demand(mysql_db_url, caplog):
+    engine = create_engine(mysql_db_url, echo_pool='debug')
+
+    # Connection pooling is enabled by default (QueuePool), and connections are
+    # created on demand.
+    caplog.clear()
+    conn = engine.connect()
+
+    expected_msgs = [
+        r'Created new connection <pymysql\.connections\.Connection object at 0x.+>$',
+        r'Connection <pymysql\.connections\.Connection object at 0x.+> checked out from pool$',
+    ]
+    assert len(caplog.records) == 2
+    for idx, log in enumerate(caplog.records):
+        assert log.name == 'sqlalchemy.pool.QueuePool'
+        assert re.match(expected_msgs[idx], log.message)
+
+    # Returned to the pool, and release transactional resources (rollback).
+    caplog.clear()
+    conn.close()
+
+    expected_msgs = [
+        r'Connection <pymysql\.connections\.Connection object at 0x.+> being returned to pool$',
+        r'Connection <pymysql\.connections\.Connection object at 0x.+> rollback-on-return$',
+    ]
+    assert len(caplog.records) == 2
+    for idx, log in enumerate(caplog.records):
+        assert log.name == 'sqlalchemy.pool.QueuePool'
+        assert re.match(expected_msgs[idx], log.message)

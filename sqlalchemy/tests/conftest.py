@@ -205,23 +205,26 @@ def testdata(request):
 def workspace(tmpdir):
     return Workspace(tmpdir.strpath)
 
-@pytest.fixture
-def mysql_engine():
-    params = {
-        'host': 'mysql',
-        'user': 'user',
-        'passwd': 'secret',
-        'db': 'db',
-    }
+DB_PARAMS = {
+    'host': 'mysql',
+    'user': 'user',
+    'passwd': 'secret',
+    'db': 'db',
+}
 
+@pytest.fixture(scope='session')
+def mysql_db_url():
+    return 'mysql+pymysql://%(user)s:%(passwd)s@%(host)s/%(db)s' % DB_PARAMS
+
+@pytest.fixture
+def mysql_engine(mysql_db_url):
     from sqlalchemy import create_engine
-    db_url = 'mysql+pymysql://%(user)s:%(passwd)s@%(host)s/%(db)s' % params
-    engine = create_engine(db_url, echo=True)
+    engine = create_engine(mysql_db_url, echo=True)
     yield engine
 
     # DROP all tables and reset AUTO_INCREMENT value
     conn = engine.connect()
-    result = conn.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='%(db)s'" % params)
+    result = conn.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='%(db)s'" % DB_PARAMS)
     for row in result:
         table_name = row[0]
-        conn.execute("DROP TABLE %s;" % table_name)
+        conn.execute("DROP TABLE `%s`;" % table_name)
