@@ -19,6 +19,8 @@ def output(py2):
 @pytest.fixture
 def logger(output):
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
     for handler in logger.handlers:
         logger.removeHandler(handler)
 
@@ -64,3 +66,19 @@ def test_formatter_time_zone__use_utc_instead(logging_time_time, logger, output)
 
     logger.warning('log message')
     assert output.getvalue() == '2018-12-02 01:30:00,000 log message\n'
+
+def test_formatter_extra__format_string_placeholders(logger, output):
+    formatter = logging.Formatter("%(message)s user='%(user)s' keyword='%(keyword)s'")
+    logger.handlers[0].setFormatter(formatter)
+
+    logger.debug('Search', extra={'user': 'jeremykao', 'keyword': 'python'})
+
+    assert output.getvalue() == "Search user='jeremykao' keyword='python'\n"
+
+def test_formatter_extra__missing_some_attrs__log_nothing(logger, output):
+    formatter = logging.Formatter("%(message)s user='%(user)s'")
+    logger.handlers[0].setFormatter(formatter)
+
+    logger.debug('Sign in', extra={'foo': 'bar'})
+
+    assert output.getvalue() == ''
