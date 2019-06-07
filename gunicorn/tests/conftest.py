@@ -6,6 +6,8 @@ from textwrap import dedent
 import re
 import pytest
 
+_DEFALUT_EXPECT_TIMEOUT = 3
+
 class DataFileHelper(object):
 
     def __init__(self, base_dir):
@@ -28,11 +30,30 @@ class DataFileHelper(object):
 
 INDENTED_LITERAL = re.compile(r'^\n?(?P<content>.*)\n?\s*$', re.DOTALL)
 
-class Shell(object):
+def _dedent(content):
+    match = INDENTED_LITERAL.match(content)
+    assert match, content
+
+    # dedent
+    lines = dedent(match.group('content')).splitlines()
+
+    # remove leading '|'
+    if all(map(lambda x: x.startswith('|'), lines)):
+        lines = map(lambda x: x[1:], lines)
+    return '\n'.join(lines)
+
+class Workspace(object):
 
     def __init__(self, workdir):
         print('WORKDIR = %s' % workdir, file=sys.stderr)
         self.workdir = workdir
+        self._file_helper = DataFileHelper(workdir)
+
+    def read(self, fn, encoding=None):
+        return self._file_helper.read(fn, encoding)
+
+    def json(self, fn, encoding='utf-8'):
+        return self._file_helper.json(fn, encoding)
 
     def run(self, cmdline, err_expected=False):
         _cwd = os.getcwd()
@@ -69,7 +90,7 @@ class Shell(object):
             os.makedirs(dirname)
 
         with open(pathname, 'wb') as f:
-            f.write(self._trim(content).encode(encoding))
+            f.write(_dedent(content).encode(encoding))
 
     def exists(self, pathname):
         dir_expected = pathname.endswith('/')
@@ -85,18 +106,23 @@ class Shell(object):
             pathname = path.join(self.workdir, pathname)
         return pathname
 
-    def _trim(self, content):
-        match = INDENTED_LITERAL.match(content)
-        assert match, content
-
-        return dedent(match.group('content'))
-
 class ShellRunResult(object):
 
     def __init__(self, out, err, rc):
-        self.out = out
-        self.err = err
+        self._out = out
+        self._err = err
         self.rc = rc
+
+    @property
+    def out(self):
+        return self._trim_trailing_newline(self._out)
+
+    @property
+    def err(self):
+        return self._trim_trailing_newline(self._err)
+
+    def _trim_trailing_newline(self, txt):
+        return txt[0:-1] if txt[-1] == '\n' else txt
 
 class PexpectSpawnContext(object):
 
@@ -117,19 +143,31 @@ class PexpectSpawnContext(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._child.terminate(force=True)
 
-    def expect(self, pattern, timeout=3):
-        pattern = self._to_pexpect_newline(self._to_unicode(pattern))
-        return self._child.expect(pattern, timeout=timeout)
+    def expect(self, pattern, timeout=_DEFALUT_EXPECT_TIMEOUT):
+        pattern = self._to_tty_newline(self._to_unicode(pattern))
 
-    def expect_exact(self, pattern, timeout=3):
-        pattern = self._to_pexpect_newline(self._to_unicode(pattern))
-        return self._child.expect_exact(pattern, timeout=timeout)
+        try:
+            return self._child.expect(pattern, timeout=timeout)
+        except Exception:
+            print(repr(self.before), file=sys.stderr)
+            raise
 
-    def expect_eof(self, timeout=3):
+    def expect_exact(self, pattern, timeout=_DEFALUT_EXPECT_TIMEOUT, dedent=True):
+        pattern = self._to_unicode(pattern)
+
+        try:
+            return self._child.expect_exact(
+                self._to_tty_newline(_dedent(pattern) if dedent else pattern),
+                timeout=timeout)
+        except Exception:
+            print(repr(self.before), file=sys.stderr)
+            raise
+
+    def expect_eof(self, timeout=_DEFALUT_EXPECT_TIMEOUT):
         import pexpect
         return self._child.expect(pexpect.EOF, timeout=timeout)
 
-    def expect_no_more_output(self, timeout=3):
+    def expect_no_more_output(self, timeout=_DEFALUT_EXPECT_TIMEOUT):
         from pexpect import EOF, TIMEOUT
 
         try:
@@ -170,15 +208,21 @@ class PexpectSpawnContext(object):
     def after(self):
         return self._to_unix_newline(self._child.after)
 
-    def _to_unix_newline(self, input_):
-        return input_.replace('\r\n', '\n')
+    @staticmethod
+    def _to_unix_newline(tty_output):
+        return tty_output.replace('\r\n', '\n')
 
-    def _to_pexpect_newline(self, input_):
-        return input_.replace('\n', '\r\n').replace(r'\n', r'\r\n')
+    @staticmethod
+    def _to_tty_newline(string):
+        return string.replace('\n', '\r\n').replace(r'\n', r'\r\n')
 
     @property
     def match(self):
         return self._child.match
+
+@pytest.fixture(scope="session")
+def py2():
+    return sys.version_info[0] == 2
 
 @pytest.fixture
 def testdata(request):
@@ -186,6 +230,6 @@ def testdata(request):
     return DataFileHelper(base_dir)
 
 @pytest.fixture
-def shell(tmpdir):
-    return Shell(tmpdir.strpath)
+def workspace(tmpdir):
+    return Workspace(tmpdir.strpath)
 

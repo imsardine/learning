@@ -1,8 +1,8 @@
 import re
 import requests
 
-def test_hello_world(shell):
-    shell.src('hello.py', """
+def test_hello_world(workspace):
+    workspace.src('hello.py', """
     def app(environ, start_response):
         data = b'Hello, World!'
         start_response('200 OK', [
@@ -13,7 +13,7 @@ def test_hello_world(shell):
         return iter([data])
     """)
 
-    with shell.spawn('gunicorn -w 4 hello:app') as p:
+    with workspace.spawn('gunicorn -w 4 hello:app') as p:
         p.expect_exact('[INFO] Listening at: http://127.0.0.1:8000')
         p.expect_exact('[INFO] Using worker: sync')
 
