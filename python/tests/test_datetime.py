@@ -3,6 +3,23 @@ import json
 import pytz
 import pytest
 
+from . import py3_later
+
+def test_date__isoformat__no_time_part():
+    dt = date(2018, 1, 2)
+    assert dt.isoformat() == '2018-01-02'
+
+def test_datetime__isoformat_naive__no_timezone_designator():
+    dt = datetime(2018, 1, 2, 9, 30)
+    assert dt.isoformat() == '2018-01-02T09:30:00'
+
+@py3_later
+def test_datetime__isoformat_aware__with_timezone_designator():
+    from datetime import timezone
+
+    dt = datetime(2018, 1, 2, 9, 30, tzinfo=timezone.utc)
+    assert dt.isoformat() == '2018-01-02T09:30:00+00:00'
+
 def test_date_not_json_serializable(py2):
     dt = date(2018, 1, 2)
     with pytest.raises(TypeError) as excinfo:
