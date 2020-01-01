@@ -1,1 +1,11 @@
-target/
+*.pyc
+/tmp/
+
+# tox, pytest
+/.tox/
+/.cache/
+/.pytest_cache/
+/*.egg-info/
+
+# settings
+/credentials*.mk
