@@ -28,7 +28,7 @@ def test_subcmds__help_message():
     assert parser.format_help() == dedent("""\
         usage: cmd [-h] [--cmd-opt <value>] <command> ...
 
-        optional arguments:
+        options:
           -h, --help         show this help message and exit
           --cmd-opt <value>  Help message of the option
 
@@ -44,7 +44,7 @@ def test_subcmds__help_message():
         positional arguments:
           subcmd1-arg
 
-        optional arguments:
+        options:
           -h, --help            show this help message and exit
           --subcmd1-opt <value>\n""")
 
@@ -149,7 +149,7 @@ def test_argument_dependency__help_message():
         positional arguments:
           command
 
-        optional arguments:
+        options:
           -h, --help\n""")
 
     with pytest.raises(HelpNeeded) as exc_info:
@@ -161,5 +161,5 @@ def test_argument_dependency__help_message():
           start_date
           end_date
 
-        optional arguments:
+        options:
           -h, --help\n""")
