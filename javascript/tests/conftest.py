@@ -6,6 +6,9 @@ from textwrap import dedent
 import re
 import pytest
 
+def _trim_trailing_newline(txt):
+    return txt if (len(txt) == 0 or txt[-1] != '\n') else txt[0:-1]
+
 class DataFileHelper(object):
 
     def __init__(self, base_dir):
@@ -21,6 +24,13 @@ class DataFileHelper(object):
         with open(self.abspath(fn), 'rb') as f:
             data = f.read()
             return data.decode(encoding) if encoding else data
+
+    def read_txt(self, fn, encoding='utf-8', trim_trailing_newline=True):
+        txt = self.read(fn, encoding)
+        if trim_trailing_newline:
+            txt = _trim_trailing_newline(txt)
+
+        return txt
 
     def json(self, fn, encoding='utf-8'):
         import json
@@ -40,6 +50,8 @@ def _dedent(content):
         lines = map(lambda x: x[1:], lines)
     return '\n'.join(lines)
 
+lines = _dedent
+
 class Workspace(object):
 
     def __init__(self, workdir):
@@ -49,6 +61,9 @@ class Workspace(object):
 
     def read(self, fn, encoding=None):
         return self._file_helper.read(fn, encoding)
+
+    def read_txt(self, fn, encoding='utf-8', trim_trailing_newline=True):
+        return self._file_helper.read_txt(fn, encoding, trim_trailing_newline)
 
     def json(self, fn, encoding='utf-8'):
         return self._file_helper.json(fn, encoding)
@@ -107,9 +122,17 @@ class Workspace(object):
 class ShellRunResult(object):
 
     def __init__(self, out, err, rc):
-        self.out = out
-        self.err = err
+        self._out = out
+        self._err = err
         self.rc = rc
+
+    @property
+    def out(self):
+        return _trim_trailing_newline(self._out)
+
+    @property
+    def err(self):
+        return _trim_trailing_newline(self._err)
 
 class PexpectSpawnContext(object):
 
@@ -195,6 +218,10 @@ class PexpectSpawnContext(object):
     @property
     def match(self):
         return self._child.match
+
+@pytest.fixture(scope="session")
+def py2():
+    return sys.version_info[0] == 2
 
 @pytest.fixture
 def testdata(request):

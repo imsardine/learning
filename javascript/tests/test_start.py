@@ -4,4 +4,4 @@ def test_hello_world(workspace):
     ''')
 
     r = workspace.run('node index.js')
-    assert r.out == 'Hello, World!\n'
+    assert r.out == 'Hello, World!'

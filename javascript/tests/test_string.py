@@ -8,7 +8,7 @@ def test_multiline__array_join(workspace):
     ''')
 
     r = workspace.run('node index.js')
-    assert r.out == '[line1\nline2]\n'
+    assert r.out == '[line1\nline2]'
 
 def test_multiline__string_concatenation(workspace):
     workspace.src('index.js', r'''
@@ -19,7 +19,7 @@ def test_multiline__string_concatenation(workspace):
     ''')
 
     r = workspace.run('node index.js')
-    assert r.out == '[line1\nline2]\n'
+    assert r.out == '[line1\nline2]'
 
 def test_multiline__template_literal__may_not_work(workspace):
     workspace.src('index.js', r'''
@@ -31,7 +31,7 @@ def test_multiline__template_literal__may_not_work(workspace):
 
     # leading whitespaces are preserved
     r = workspace.run('node index.js')
-    assert r.out == '[line1\n  line2]\n'
+    assert r.out == '[line1\n  line2]'
 
 def test_template_literal__interpolation(workspace):
     workspace.src('index.js', r'''
@@ -40,4 +40,4 @@ def test_template_literal__interpolation(workspace):
     ''')
 
     r = workspace.run('node index.js')
-    assert r.out == 'Hi Jeremy, how are you today?\n'
+    assert r.out == 'Hi Jeremy, how are you today?'
