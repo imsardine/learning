@@ -105,6 +105,13 @@ class Workspace(object):
         with open(pathname, 'wb') as f:
             f.write(_dedent(content).encode(encoding))
 
+    def eval(self, code, err_expected=False):
+        self.src('index.js', code)
+        return self.run('node index.js', err_expected)
+
+    def eval_err(self, code):
+        return self.eval(code, err_expected=True)
+
     def exists(self, pathname):
         dir_expected = pathname.endswith('/')
 
