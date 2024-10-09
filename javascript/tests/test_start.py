@@ -100,9 +100,11 @@ def test_var__not_block_scoped(workspace):
     from L1; --> L0 (ok), --> L1 (ok), --> L2 (ok)
     ''')
 
-def test_infinity__when(workspace):
+def test_infinity__a_number_when(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
+    console.log(`Infinity is also a ${ typeof Infinity }!`)
+
     let v = 1 / 0
     console.log(`1 / 0 --> ${v} (${ v === Infinity })`)
 
@@ -111,39 +113,48 @@ def test_infinity__when(workspace):
     ''')
 
     assert r.out == lines('''
+    Infinity is also a number!
     1 / 0 --> Infinity (true)
     -1 / 0 --> -Infinity (true)
     ''')
 
-def test_nan__when_and_contagious(workspace):
+def test_nan__a_number_when_and_contagious(workspace):
     # `NaN` is contagious: if you provide it as an operand to any mathematical operation, the result will also be `NaN`.
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
+    console.log(`NaN is also a ${ typeof NaN }!`)
+
     let nan = parseInt('non-numeric')
     console.log(`parseInt('non-numeric') --> ${nan}`)
     console.log(`1 + NaN --> ${ 1 + nan }`) // contagious
     ''')
 
     assert r.out == lines('''
+    NaN is also a number!
     parseInt('non-numeric') --> NaN
     1 + NaN --> NaN
     ''')
 
-def test_nan__only_value_that_never_equal_to_itself(workspace):
+def test_nan__never_equal_to_itself__use_isnan_instead(workspace):
     # `NaN` is the only value in JavaScript that's **not equal to itself**
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
-    console.log(`NaN === NaN --> ${ NaN === NaN }`)
     console.log(`undefined === undefined --> ${ undefined === undefined }`)
     console.log(`null === null --> ${ null === null }`)
     console.log(`Infinity === Infinity --> ${ Infinity === Infinity }`)
+
+    console.log(`NaN === NaN --> ${ NaN === NaN }`) // use Number.isNaN() instead
+    console.log(`Number.isNaN('nan') --> ${ Number.isNaN('nan') }`)
+    console.log(`Number.isNaN(NaN) --> ${ Number.isNaN(NaN) }`)
     ''')
 
     assert r.out == lines('''
-    NaN === NaN --> false
     undefined === undefined --> true
     null === null --> true
     Infinity === Infinity --> true
+    NaN === NaN --> false
+    Number.isNaN('nan') --> false
+    Number.isNaN(NaN) --> true
     ''')
 
 def test_undefined__when_let_var_not_initialized(workspace):
