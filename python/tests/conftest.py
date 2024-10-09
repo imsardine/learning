@@ -6,6 +6,9 @@ from textwrap import dedent
 import re
 import pytest
 
+def _trim_trailing_newline(txt):
+    return txt if (len(txt) == 0 or txt[-1] != '\n') else txt[0:-1]
+
 class DataFileHelper(object):
 
     def __init__(self, base_dir):
@@ -21,6 +24,13 @@ class DataFileHelper(object):
         with open(self.abspath(fn), 'rb') as f:
             data = f.read()
             return data.decode(encoding) if encoding else data
+
+    def read_txt(self, fn, encoding='utf-8', trim_trailing_newline=True):
+        txt = self.read(fn, encoding)
+        if trim_trailing_newline:
+            txt = _trim_trailing_newline(txt)
+
+        return txt
 
     def json(self, fn, encoding='utf-8'):
         import json
@@ -40,6 +50,8 @@ def _dedent(content):
         lines = map(lambda x: x[1:], lines)
     return '\n'.join(lines)
 
+lines = _dedent
+
 class Workspace(object):
 
     def __init__(self, workdir):
@@ -49,6 +61,9 @@ class Workspace(object):
 
     def read(self, fn, encoding=None):
         return self._file_helper.read(fn, encoding)
+
+    def read_txt(self, fn, encoding='utf-8', trim_trailing_newline=True):
+        return self._file_helper.read_txt(fn, encoding, trim_trailing_newline)
 
     def json(self, fn, encoding='utf-8'):
         return self._file_helper.json(fn, encoding)
@@ -86,6 +101,13 @@ class Workspace(object):
         with open(pathname, 'wb') as f:
             f.write(_dedent(content).encode(encoding))
 
+    def eval(self, code, err_expected=False):
+        self.src('main.py', code)
+        return self.run('python main.py', err_expected)
+
+    def eval_err(self, code):
+        return self.eval(code, err_expected=True)
+
     def exists(self, pathname):
         dir_expected = pathname.endswith('/')
 
@@ -109,14 +131,11 @@ class ShellRunResult(object):
 
     @property
     def out(self):
-        return self._trim_trailing_newline(self._out)
+        return _trim_trailing_newline(self._out)
 
     @property
     def err(self):
-        return self._trim_trailing_newline(self._err)
-
-    def _trim_trailing_newline(self, txt):
-        return txt[0:-1] if txt[-1] == '\n' else txt
+        return _trim_trailing_newline(self._err)
 
 class PexpectSpawnContext(object):
 
