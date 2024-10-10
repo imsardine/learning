@@ -2,7 +2,7 @@ from .conftest import lines
 
 def test_literal__single_double_no_difference(workspace):
     r = workspace.eval('''
-    let message = 'Keep learning, ' + "don't stop!"
+    const message = 'Keep learning, ' + "don't stop!"
     console.log(message)
     ''')
 
@@ -10,7 +10,7 @@ def test_literal__single_double_no_difference(workspace):
 
 def test_literal__no_character_type(workspace):
     r = workspace.eval('''
-    let char = 'c'
+    const char = 'c'
     console.log(`${ typeof char } (${ char.length })`) // string
     ''')
 
@@ -18,7 +18,7 @@ def test_literal__no_character_type(workspace):
 
 def test_multiline__array_join(workspace):
     r = workspace.eval(r'''
-    let lines = [
+    const lines = [
       'line1',
       'line2'
     ].join('\n')
@@ -29,7 +29,7 @@ def test_multiline__array_join(workspace):
 
 def test_multiline__string_concatenation(workspace):
     r = workspace.eval(r'''
-    let lines =
+    const lines =
       'line1\n' +
       'line2'
     console.log(`[${lines}]`)
@@ -39,7 +39,7 @@ def test_multiline__string_concatenation(workspace):
 
 def test_multiline__template_literal__may_not_work(workspace):
     r = workspace.eval('''
-    let lines =
+    const lines =
       `line1
       line2`
     console.log(`[${lines}]`)
@@ -50,7 +50,7 @@ def test_multiline__template_literal__may_not_work(workspace):
 
 def test_template_literal__interpolation(workspace):
     r = workspace.eval('''
-    let name = 'Jeremy', time = 'today'
+    const name = 'Jeremy', time = 'today'
     console.log(`Hi ${name}, how are you ${time}?`)
     ''')
 
@@ -59,7 +59,7 @@ def test_template_literal__interpolation(workspace):
 def test_string_concatenation__addition_operator(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Addition
     r = workspace.eval('''
-    let name = 'Jeremy'
+    const name = 'Jeremy'
     console.log('Hello, World! Hello ' + name + '!')
     ''')
 
@@ -67,7 +67,7 @@ def test_string_concatenation__addition_operator(workspace):
 
 def test_string_concatenation__template_literal(workspace):
     r = workspace.eval('''
-    let name = 'Jeremy'
+    const name = 'Jeremy'
     console.log(`Hello, World! Hello ${name}!`)
     ''')
 
@@ -75,7 +75,7 @@ def test_string_concatenation__template_literal(workspace):
 
 def test_string_concatenation__string_concat(workspace):
     r = workspace.eval('''
-    let name = 'Jeremy'
+    const name = 'Jeremy'
     console.log('Hello, World! Hello '.concat(name).concat('!'))
     ''')
 

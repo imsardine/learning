@@ -2,11 +2,31 @@ from .conftest import lines
 
 def test_hello_world(workspace):
     r = workspace.eval('''
-    let lang = 'JavaScript (JS)'
+    const lang = 'JavaScript (JS)'
     console.log(`Hello, ${lang}!`);
     ''')
 
-    assert r.out == 'Hello, JavaScript (JS)!'
+    assert r._out == 'Hello, JavaScript (JS)!\n'
+
+def test_typeof__primitive_types(workspace):
+    r = workspace.eval('''
+    console.log(`typeof 1 --> ${ typeof 1 }`) // number
+    console.log(`typeof 1n --> ${ typeof 1n }`) // bigint
+    console.log(`typeof '' --> ${ typeof '' }`) // string
+    console.log(`typeof false --> ${ typeof false }`) // boolean
+    console.log(`typeof null --> ${ typeof null }`) // object!
+    console.log(`typeof undefined --> ${ typeof undefined }`) // undefined
+    // symbol
+    ''')
+
+    assert r.out == lines('''
+    typeof 1 --> number
+    typeof 1n --> bigint
+    typeof '' --> string
+    typeof false --> boolean
+    typeof null --> object
+    typeof undefined --> undefined
+    ''')
 
 def test_let__access_before_declaration__reference_error(workspace):
     r = workspace.eval_err('''
@@ -100,6 +120,40 @@ def test_var__not_block_scoped(workspace):
     from L1; --> L0 (ok), --> L1 (ok), --> L2 (ok)
     ''')
 
+def test_undefined__when_let_var_not_initialized(workspace):
+    r = workspace.eval('''
+    let letNotInitialized
+    var varNotInitialized
+
+    console.log(`let --> undefined (${ letNotInitialized === undefined })`)
+    console.log(`var --> undefined (${ varNotInitialized === undefined })`)
+    ''')
+
+    assert r.out == lines('''
+    let --> undefined (true)
+    var --> undefined (true)
+    ''')
+
+def test_undefined__when_return_with_no_value(workspace):
+    r = workspace.eval('''
+    function fun() {
+      return;
+    }
+
+    console.log(`return; --> ${ fun() }`)
+    ''')
+
+    assert r.out == 'return; --> undefined'
+
+def test_undefined__when_access_nonexistent_property__no_error(workspace):
+    r = workspace.eval('''
+    lang = {} // empty object
+    console.log(`lang.xxx: ${ typeof lang.xxx }`)
+    ''')
+
+    assert r.rc == 0 # no error!
+    assert r.out == 'lang.xxx: undefined'
+
 def test_infinity__a_number_when(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
@@ -124,7 +178,7 @@ def test_nan__a_number_when_and_contagious(workspace):
     r = workspace.eval('''
     console.log(`NaN is also a ${ typeof NaN }!`)
 
-    let nan = parseInt('non-numeric')
+    const nan = parseInt('non-numeric')
     console.log(`parseInt('non-numeric') --> ${nan}`)
     console.log(`1 + NaN --> ${ 1 + nan }`) // contagious
     ''')
@@ -155,51 +209,6 @@ def test_nan__never_equal_to_itself__use_isnan_instead(workspace):
     NaN === NaN --> false
     Number.isNaN('nan') --> false
     Number.isNaN(NaN) --> true
-    ''')
-
-def test_undefined__when_let_var_not_initialized(workspace):
-    r = workspace.eval('''
-    let letNotInitialized
-    var varNotInitialized
-
-    console.log(`let --> undefined (${ letNotInitialized === undefined })`)
-    console.log(`var --> undefined (${ varNotInitialized === undefined })`)
-    ''')
-
-    assert r.out == lines('''
-    let --> undefined (true)
-    var --> undefined (true)
-    ''')
-
-def test_undefined__when_return_with_no_value(workspace):
-    r = workspace.eval('''
-    function fun() {
-      return;
-    }
-
-    console.log(`return; --> ${ fun() }`)
-    ''')
-
-    assert r.out == 'return; --> undefined'
-
-def test_typeof__primitive_types(workspace):
-    r = workspace.eval('''
-    console.log(`typeof 1 --> ${ typeof 1 }`) // number
-    console.log(`typeof 1n --> ${ typeof 1n }`) // bigint
-    console.log(`typeof '' --> ${ typeof '' }`) // string
-    console.log(`typeof false --> ${ typeof false }`) // boolean
-    console.log(`typeof null --> ${ typeof null }`) // object!
-    console.log(`typeof undefined --> ${ typeof undefined }`) // undefined
-    // symbol
-    ''')
-
-    assert r.out == lines('''
-    typeof 1 --> number
-    typeof 1n --> bigint
-    typeof '' --> string
-    typeof false --> boolean
-    typeof null --> object
-    typeof undefined --> undefined
     ''')
 
 def test_boolean_context__truthy_falsy(workspace):
