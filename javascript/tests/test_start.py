@@ -3,35 +3,96 @@ from .conftest import lines
 def test_hello_world(workspace):
     r = workspace.eval('''
     const lang = 'JavaScript (JS)'
-    console.log(`Hello, ${lang}!`);
+    console.log(`Hello, ${lang}!`); // template literal
     ''')
 
     assert r._out == 'Hello, JavaScript (JS)!\n'
 
+def test_assignment__expression_resolves_to_a_value(workspace):
+    r = workspace.eval('''
+    let x;
+    console.log(x = 1 + 6); // unique and convenient
+    ''')
+
+    assert r.out == '7'
+
 def test_typeof__primitive_types(workspace):
     r = workspace.eval('''
-    console.log(`typeof 1 --> ${ typeof 1 }`) // number
-    console.log(`typeof 1n --> ${ typeof 1n }`) // bigint
-    console.log(`typeof '' --> ${ typeof '' }`) // string
-    console.log(`typeof false --> ${ typeof false }`) // boolean
-    console.log(`typeof null --> ${ typeof null }`) // object!
-    console.log(`typeof undefined --> ${ typeof undefined }`) // undefined
+    console.log(typeof 1); // number
+    console.log(typeof NaN); // number. special number
+    console.log(typeof Infinity); // number. special number
+    console.log(typeof 1n); // bigint
+    console.log(typeof ''); // string
+    console.log(typeof false); // boolean
+    console.log(typeof null); // object. special case
+    console.log(typeof undefined); // undefined
     // symbol
     ''')
 
-    assert r.out == lines('''
-    typeof 1 --> number
-    typeof 1n --> bigint
-    typeof '' --> string
-    typeof false --> boolean
-    typeof null --> object
-    typeof undefined --> undefined
+    assert r.out == 'number\nnumber\nnumber\nbigint\nstring\nboolean\nobject\nundefined'
+
+def test_boolean_context__truthy_falsy(workspace):
+    r = workspace.eval('''
+    console.log(Boolean(0));
+    console.log(Boolean(-1)); // false. non-zero
+    console.log(Boolean('')); // false. empty string
+    console.log(Boolean([])); // true. counter-intuitive!
+    console.log(Boolean({})); // true. counter-intuitive!
     ''')
+
+    assert r.out == 'false\ntrue\nfalse\ntrue\ntrue'
+
+def test_comparison__double_equals__loose_equality_with_type_coercion(workspace):
+    r = workspace.eval('''
+    const o1 = [1, 2, 3], o2 = [1, 2, 3]; // arrays are also objects
+
+    // object to object, true only reference the same object
+    console.log(o1 == o1); // true
+    console.log(o1 == o2); // false
+
+    // object to primitive, primitive coercion involved
+    console.log([] == false); // true. [] -> false, even [] is truthy
+
+    // different types, type coercion involved
+    console.log(1 == true); // true.
+    console.log(true == 1); // true. symmetric, either way
+    console.log(0 == false); // true. Boolean(0) -> false, Number(false) -> 0
+    console.log(1 == '1'); // true
+
+    // exceptions
+    console.log(null == undefined); // true. null/undefined only equals to null/undefined
+    console.log(undefined == null); // true.
+    console.log(false == undefined); // false. even undefined is falsy
+
+    console.log(NaN == NaN); // false. NaN never equals to anything
+    ''')
+
+    assert r.out == 'true\nfalse\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse\nfalse'
+
+def test_comparison__triple_equals__strict_equality_no_type_coercion_simple(workspace):
+    r = workspace.eval('''
+    const o1 = [1, 2, 3], o2 = [1, 2, 3]; // arrays are also objects
+
+    // objects, true only reference the same object
+    console.log(o1 === o1); // true
+    console.log(o1 === o2); // false
+
+    // different types, always false
+    console.log(1 === true); // false
+    console.log(true === 1); // false
+    console.log(1 === '1'); // false
+    console.log(null === undefined); // false
+
+    // exceptions
+    console.log(NaN === NaN); // false. NaN never equals to anything
+    ''')
+
+    assert r.out == 'true\nfalse\nfalse\nfalse\nfalse\nfalse\nfalse'
 
 def test_let__access_before_declaration__reference_error(workspace):
     r = workspace.eval_err('''
-    console.log(`Hello, ${lang}!`)
-    let lang = 'JavaScript (JS)'
+    console.log(lang);
+    let lang = 'JavaScript (JS)';
     ''')
 
     # ReferenceError: Cannot access 'xxx' before initialization
@@ -40,16 +101,16 @@ def test_let__access_before_declaration__reference_error(workspace):
 def test_let__block_scoped__or_reference_error(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#variables
     r = workspace.eval_err('''
-    let outerL0 = '--> L0 (ok)'
+    let outerL0 = '--> L0 (ok)';
     { // block L1
-      let innerL1 = '--> L1 (ok)'
+      let innerL1 = '--> L1 (ok)';
 
       { // block L2
-        let innerL2 = '--> L2 (ok)'
-        console.log(`from L2; ${outerL0}, ${innerL1}, ${innerL2}`)
+        let innerL2 = '--> L2 (ok)';
+        console.log(`from L2; ${outerL0}, ${innerL1}, ${innerL2}`);
       }
 
-      console.log(`from L1; ${outerL0}, ${innerL1}, ${innerL2}`)
+      console.log(`from L1; ${outerL0}, ${innerL1}, ${innerL2}`);
     }
     ''')
 
@@ -59,8 +120,8 @@ def test_let__block_scoped__or_reference_error(workspace):
 def test_const__without_initiation__syntax_error(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#variables
     r = workspace.eval_err('''
-    const Pi
-    Pi = 3.14
+    const Pi;
+    Pi = 3.14;
     ''')
 
     assert 'SyntaxError: Missing initializer in const declaration' in r.err
@@ -68,16 +129,16 @@ def test_const__without_initiation__syntax_error(workspace):
 def test_const__block_scoped_like_let__or_reference_error(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#variables
     r = workspace.eval_err('''
-    const outerL0 = '--> L0 (ok)'
+    const outerL0 = '--> L0 (ok)';
     { // block L1
-      const innerL1 = '--> L1 (ok)'
+      const innerL1 = '--> L1 (ok)';
 
       { // block L2
-        const innerL2 = '--> L2 (ok)'
-        console.log(`from L2; ${outerL0}, ${innerL1}, ${innerL2}`)
+        const innerL2 = '--> L2 (ok)';
+        console.log(`from L2; ${outerL0}, ${innerL1}, ${innerL2}`);
       }
 
-      console.log(`from L1; ${outerL0}, ${innerL1}, ${innerL2}`)
+      console.log(`from L1; ${outerL0}, ${innerL1}, ${innerL2}`);
     }
     ''')
 
@@ -87,31 +148,31 @@ def test_const__block_scoped_like_let__or_reference_error(workspace):
 def test_const__cannot_reassigned_but_still_mutable(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#variables
     r = workspace.eval_err('''
-    const fruits = ['apple', 'orange']
+    const fruits = ['apple', 'orange'];
 
-    fruits.push('starfruit') // mutable
-    console.log(`fruits = ${fruits}`)
+    fruits.push('starfruit'); // mutable
+    console.log(fruits);
 
-    fruits = [] // error
+    fruits = []; // error
     ''')
 
-    assert r.out == 'fruits = apple,orange,starfruit' # not enclosed in []
+    assert r.out == "[ 'apple', 'orange', 'starfruit' ]" # enclosed in []
     assert 'TypeError: Assignment to constant variable.' in r.err
 
 def test_var__not_block_scoped(workspace):
     # discouraged in modern JavaScript code
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#variables
     r = workspace.eval('''
-    var outerL0 = '--> L0 (ok)'
+    var outerL0 = '--> L0 (ok)';
     { // block L1
-      var innerL1 = '--> L1 (ok)'
+      var innerL1 = '--> L1 (ok)';
 
       { // block L2
-        var innerL2 = '--> L2 (ok)'
-        console.log(`from L2; ${outerL0}, ${innerL1}, ${innerL2}`)
+        var innerL2 = '--> L2 (ok)';
+        console.log(`from L2; ${outerL0}, ${innerL1}, ${innerL2}`);
       }
 
-      console.log(`from L1; ${outerL0}, ${innerL1}, ${innerL2}`)
+      console.log(`from L1; ${outerL0}, ${innerL1}, ${innerL2}`);
     }
     ''')
 
@@ -122,17 +183,14 @@ def test_var__not_block_scoped(workspace):
 
 def test_undefined__when_let_var_not_initialized(workspace):
     r = workspace.eval('''
-    let letNotInitialized
-    var varNotInitialized
+    let letNotInitialized;
+    var varNotInitialized;
 
-    console.log(`let --> undefined (${ letNotInitialized === undefined })`)
-    console.log(`var --> undefined (${ varNotInitialized === undefined })`)
+    console.log(letNotInitialized === undefined);
+    console.log(varNotInitialized === undefined);
     ''')
 
-    assert r.out == lines('''
-    let --> undefined (true)
-    var --> undefined (true)
-    ''')
+    assert r.out == 'true\ntrue'
 
 def test_undefined__when_return_with_no_value(workspace):
     r = workspace.eval('''
@@ -140,90 +198,54 @@ def test_undefined__when_return_with_no_value(workspace):
       return;
     }
 
-    console.log(`return; --> ${ fun() }`)
+    console.log(fun());
     ''')
 
-    assert r.out == 'return; --> undefined'
+    assert r.out == 'undefined'
 
 def test_undefined__when_access_nonexistent_property__no_error(workspace):
     r = workspace.eval('''
-    lang = {} // empty object
-    console.log(`lang.xxx: ${ typeof lang.xxx }`)
+    lang = {}; // empty object
+    console.log(typeof lang.xxx);
     ''')
 
     assert r.rc == 0 # no error!
-    assert r.out == 'lang.xxx: undefined'
+    assert r.out == 'undefined'
 
 def test_infinity__a_number_when(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
-    console.log(`Infinity is also a ${ typeof Infinity }!`)
-
-    let v = 1 / 0
-    console.log(`1 / 0 --> ${v} (${ v === Infinity })`)
-
-    v = -1 / 0
-    console.log(`-1 / 0 --> ${v} (${ v === -Infinity })`)
+    console.log(typeof Infinity); // Infinity is also a number
+    console.log(1 / 0 === Infinity);
+    console.log(-1 / 0 === -Infinity);
     ''')
 
-    assert r.out == lines('''
-    Infinity is also a number!
-    1 / 0 --> Infinity (true)
-    -1 / 0 --> -Infinity (true)
-    ''')
+    assert r.out == 'number\ntrue\ntrue'
 
 def test_nan__a_number_when_and_contagious(workspace):
     # `NaN` is contagious: if you provide it as an operand to any mathematical operation, the result will also be `NaN`.
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
-    console.log(`NaN is also a ${ typeof NaN }!`)
+    console.log(typeof NaN);
 
-    const nan = parseInt('non-numeric')
-    console.log(`parseInt('non-numeric') --> ${nan}`)
-    console.log(`1 + NaN --> ${ 1 + nan }`) // contagious
+    const nan = parseInt('non-numeric');
+    console.log(nan);
+    console.log(1 + nan); // contagious
     ''')
 
-    assert r.out == lines('''
-    NaN is also a number!
-    parseInt('non-numeric') --> NaN
-    1 + NaN --> NaN
-    ''')
+    assert r.out == 'number\nNaN\nNaN'
 
 def test_nan__never_equal_to_itself__use_isnan_instead(workspace):
-    # `NaN` is the only value in JavaScript that's **not equal to itself**
-    # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
-    console.log(`undefined === undefined --> ${ undefined === undefined }`)
-    console.log(`null === null --> ${ null === null }`)
-    console.log(`Infinity === Infinity --> ${ Infinity === Infinity }`)
+    console.log(undefined === undefined);
+    console.log(null === null);
+    console.log(Infinity === Infinity);
 
-    console.log(`NaN === NaN --> ${ NaN === NaN }`) // use Number.isNaN() instead
-    console.log(`Number.isNaN('nan') --> ${ Number.isNaN('nan') }`)
-    console.log(`Number.isNaN(NaN) --> ${ Number.isNaN(NaN) }`)
+    // `NaN` is the only value in JavaScript that's **not equal to itself**
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
+    console.log(NaN === NaN); // always false!
+    console.log(Number.isNaN('nan')); // use Number.isNaN() instead
+    console.log(Number.isNaN(NaN));
     ''')
 
-    assert r.out == lines('''
-    undefined === undefined --> true
-    null === null --> true
-    Infinity === Infinity --> true
-    NaN === NaN --> false
-    Number.isNaN('nan') --> false
-    Number.isNaN(NaN) --> true
-    ''')
-
-def test_boolean_context__truthy_falsy(workspace):
-    r = workspace.eval('''
-    console.log(`0 --> ${ Boolean(0) }`)
-    console.log(`-1 --> ${ Boolean(-1) }`) // non-zero
-    console.log(`'' --> ${ Boolean('') }`) // empty string
-    console.log(`[] --> ${ Boolean([]) }`) // counter-intuitive!
-    console.log(`{} --> ${ Boolean({}) }`) // counter-intuitive!
-    ''')
-
-    assert r.out == lines('''
-    0 --> false
-    -1 --> true
-    '' --> false
-    [] --> true
-    {} --> true
-    ''')
+    assert r.out == 'true\ntrue\ntrue\nfalse\nfalse\ntrue'
