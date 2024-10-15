@@ -87,3 +87,43 @@ def test_object_literal__nested(workspace):
     ''')
 
     assert r.out == 'JavaScript\nJS\nu'
+
+def test_object_literal__add_methods_later(workspace):
+    r = workspace.eval('''
+    const apple = {
+      name: 'Apple',
+      color: 'red'
+    };
+
+    apple.brief = function() {
+      return `${this.name} (${this.color})`;
+    }
+
+    console.log(apple.brief());
+    ''')
+
+    assert r.out == 'Apple (red)'
+
+def test_user_defined_object_type__with_constructor_function(workspace):
+    r = workspace.eval('''
+    function Fruit(name, color) { // constructor (function)
+      this.name = name; // this binded to the new instance (POJO)
+      this.color = color;
+
+      // no return statement
+    }
+
+    f1 = new Fruit('Apple', 'red'); // instantiation = new + constructor (function)
+    f2 = new Fruit('Orange', 'orange');
+
+    // methods can even be defined after instantiation.
+    Fruit.prototype.brief = function() {
+      return `${this.name} (${this.color})`;
+    };
+
+    console.log(f1.brief());
+    console.log(f2.brief());
+    ''')
+
+    assert r.out == 'Apple (red)\nOrange (orange)'
+
