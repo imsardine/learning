@@ -88,21 +88,23 @@ def test_object_literal__nested(workspace):
 
     assert r.out == 'JavaScript\nJS\nu'
 
-def test_object_literal__add_methods_later(workspace):
+def test_object_literal__with_methods_or_define_later(workspace):
     r = workspace.eval('''
     const apple = {
       name: 'Apple',
-      color: 'red'
+      color: 'red',
+      brief() { return `${this.name} (${this.color})` } // as brief: function() { ... }
     };
 
-    apple.brief = function() {
-      return `${this.name} (${this.color})`;
+    apple.brief2 = function() {
+      return this.brief();
     }
 
     console.log(apple.brief());
+    console.log(apple.brief2());
     ''')
 
-    assert r.out == 'Apple (red)'
+    assert r.out == 'Apple (red)\nApple (red)'
 
 def test_user_defined_object_type__with_constructor_function(workspace):
     r = workspace.eval('''
@@ -126,4 +128,3 @@ def test_user_defined_object_type__with_constructor_function(workspace):
     ''')
 
     assert r.out == 'Apple (red)\nOrange (orange)'
-
