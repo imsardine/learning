@@ -1,5 +1,5 @@
+import os, subprocess
 import pytest
-import subprocess
 
 def test_run_string__without_shell__as_executable(workspace):
     with pytest.raises(FileNotFoundError) as excinfo:
@@ -46,3 +46,30 @@ def test_run_shell__capture_output_as_text(workspace):
     assert type(r.stdout) is str and type(r.stderr) is str
     assert r.stdout == 'Hello, World! 哈囉' # text=True
     assert r.stderr == 'message redirected to STDOUT\n'
+
+def _run_for_envvars(env):
+   r = subprocess.run('env', capture_output=True, env=env)
+   return dict(line.split('=') for line in r.stdout.decode('utf-8').splitlines())
+
+def test_run_with_env__no_inheritance_only_variables_provided(workspace):
+    os.environ['ENV_FROM_PYTHON'] = 'os.environ'
+
+    # including variables set via os.environ
+    assert 'ENV_FROM_PYTHON' in _run_for_envvars(env=None)
+
+    # just the key(s) you provide
+    assert _run_for_envvars(env={}) == {} # empty env!
+    assert _run_for_envvars(env={'GREETING': 'Hello'}).keys() == { 'GREETING' }
+
+def test_howto_customize_inherited_env(workspace):
+    os.environ['MYENV1'] = '1'
+    vars_default = _run_for_envvars(env=None)
+
+    # use dict(os.environ, **key-value pairs)
+    vars_customized = _run_for_envvars(
+        env=dict(os.environ, **{'MYENV1': 'one', 'MYENV2': 'two'}))
+
+    assert set(vars_default.keys()).issubset(vars_customized.keys())
+    assert vars_customized['MYENV1'] == 'one'
+    assert set(vars_customized.keys()).difference(vars_default.keys()) == { 'MYENV2' }
+    assert vars_customized['MYENV2'] == 'two'
