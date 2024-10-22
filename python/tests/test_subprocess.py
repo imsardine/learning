@@ -2,6 +2,7 @@ import os, subprocess
 import pytest
 
 def test_run_string__without_shell__as_executable(workspace):
+    # raise error, even check=False (default)
     with pytest.raises(FileNotFoundError) as excinfo:
         subprocess.run("echo 'Hello, World!'")
 
@@ -32,6 +33,12 @@ def test_run_shell__nonzero_exit_code (workspace):
     with pytest.raises(subprocess.CalledProcessError) as excinfo:
         subprocess.run(cmd, shell=True, check=True)
     assert str(excinfo.value) == err
+
+def test_run_shell__file_not_found__error_not_raised_by_default(workspace):
+    r = subprocess.run('file_not_exist arg1 arg2', shell=True, capture_output=True)
+
+    assert r.returncode != 0 # 127
+    assert b'file_not_exist: not found' in r.stderr
 
 def test_run_shell__capture_output_as_text(workspace):
     workspace.src('message.txt', 'Hello, World! 哈囉')
