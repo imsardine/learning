@@ -21,6 +21,23 @@ def test_basic_usage(workspace):
     assert workspace.run('python hello.py World').out == 'Hello, World! :-)'
     assert workspace.run("python hello.py Python --emoticon '<3'").out == 'Hello, Python! <3'
 
+def test_multiple_option_names(workspace):
+    workspace.src('hello.py', '''
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument('-g', '--greeting', '--hi', dest='prefix', default='Hi')
+
+    args = parser.parse_args()
+    print(f'{args.prefix}, World!')
+    ''')
+
+    r = workspace.run('python hello.py --help')
+    assert '-g PREFIX, --greeting PREFIX, --hi PREFIX' in r.out
+
+    assert workspace.run('python hello.py --greeting Hello').out == 'Hello, World!'
+    assert workspace.run('python hello.py --hi Yo').out == 'Yo, World!'
+
 def test_howto_make_positional_arguments_optional(workspace):
     r = workspace.eval_err('''
     import argparse
@@ -117,7 +134,7 @@ def test_parse_known_args(workspace):
     # unexpected exit
     r = workspace.run_err("python hello.py -e '<3' -foo --bar")
     assert r.rc == 2
-    assert 'error: the following arguments are required' in r.err
+    assert 'error: the following arguments are required: who' in r.err
 
 def test_howto_as_wrapper_dispatcher_passing_remaining_args_to_another_cli_tool(workspace):
     workspace.src('hello.py', '''
@@ -140,6 +157,7 @@ def test_howto_as_wrapper_dispatcher_passing_remaining_args_to_another_cli_tool(
 
     class ArgumentParser(argparse.ArgumentParser):
 
+        # https://peps.python.org/pep-0389/#discussion-sys-stderr-and-sys-exit
         def error(self, message):
             raise argparse.ArgumentError(None, message)
 
