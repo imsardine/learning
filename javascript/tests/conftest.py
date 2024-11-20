@@ -50,7 +50,11 @@ def _dedent(content):
         lines = map(lambda x: x[1:], lines)
     return '\n'.join(lines)
 
-lines = _dedent
+def lines(lines):
+    if isinstance(lines, str):
+        return _dedent(lines)
+    else:
+        return '\n'.join(lines)
 
 class Workspace(object):
 

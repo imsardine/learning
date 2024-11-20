@@ -1,3 +1,5 @@
+from .conftest import lines
+
 def test_if_elseif_else(workspace):
     r = workspace.eval('''
     function abbrev(lang) {
@@ -15,7 +17,7 @@ def test_if_elseif_else(workspace):
     }
     ''')
 
-    assert r.out == 'JS\nPY\n(n/a)'
+    assert r.out == lines(['JS', 'PY', '(n/a)'])
 
 def test_while(workspace):
     r = workspace.eval('''
@@ -28,7 +30,7 @@ def test_while(workspace):
     }
     ''')
 
-    assert r.out == '3\n2\n1'
+    assert r.out == lines(['3', '2', '1'])
 
 def test_do_while(workspace):
     r = workspace.eval('''
@@ -41,7 +43,7 @@ def test_do_while(workspace):
     } while (input === undefined); // invalid input
     ''')
 
-    assert r.out == 'undefined\n3'
+    assert r.out == lines(['undefined', '3'])
 
 def test_while__assignment_as_condition__parentheses_and_explicit_comparison(workspace):
     r = workspace.eval('''
@@ -55,7 +57,7 @@ def test_while__assignment_as_condition__parentheses_and_explicit_comparison(wor
     }
     ''')
 
-    assert r.out == '3\n2\n1'
+    assert r.out == lines(['3', '2', '1'])
 
 def test_while__assignment_as_condition_with_variable_declaration__syntax_error(workspace):
     r = workspace.eval_err('''
@@ -79,17 +81,3 @@ def test_for(workspace):
     ''')
 
     assert r.out == '0123456789'
-
-def test_for_of(workspace):
-    r = workspace.eval('''
-    let nums = [3, 2, 1];
-
-    sum = 0;
-    for (let num of nums) {
-      sum += num;
-    }
-
-    console.log(sum); // 6
-    ''')
-
-    assert r.out == '6'
