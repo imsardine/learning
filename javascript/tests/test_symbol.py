@@ -1,3 +1,5 @@
+from .conftest import lines
+
 def test_symbol_constructor_fuction__return_unique_symbol_values(workspace):
     r = workspace.eval('''
     console.log(typeof Symbol); // function
@@ -10,7 +12,11 @@ def test_symbol_constructor_fuction__return_unique_symbol_values(workspace):
     console.log(s2, s3, s2 == s3); // Symbol(foo), false
     ''')
 
-    assert r.out == 'function\nSymbol() symbol\nSymbol(foo) Symbol(foo) false'
+    assert r.out == lines('''
+        function
+        Symbol() symbol
+        Symbol(foo) Symbol(foo) false
+    ''')
 
 def test_symbol_constructor_function__with_new__type_error(workspace):
     r = workspace.eval_err('''
@@ -32,7 +38,11 @@ def test_unique_symbol_from_global_registry(workspace):
     console.log(foo === foo2);
     ''')
 
-    assert r.out == 'function\nSymbol(foo) Symbol(foo) false\ntrue'
+    assert r.out == lines('''
+        function
+        Symbol(foo) Symbol(foo) false
+        true
+    ''')
 
 def test_get_key_of_registered_symbol(workspace):
     r = workspace.eval('''
@@ -40,7 +50,7 @@ def test_get_key_of_registered_symbol(workspace):
     console.log(Symbol.keyFor(Symbol('foo'))); // undefined (undocumented), regular (not registered), no key
     ''')
 
-    assert r.out == 'foo\nundefined'
+    assert r.out == lines(['foo', 'undefined'])
 
 def test_symbol_as_property_key(workspace):
     r = workspace.eval('''

@@ -19,28 +19,37 @@ def test_assignment__expression_resolves_to_a_value(workspace):
 def test_typeof__primitive_types(workspace):
     r = workspace.eval('''
     console.log(typeof 1); // number
-    console.log(typeof NaN); // number. special number
-    console.log(typeof Infinity); // number. special number
+    console.log(typeof NaN); // number (special)
+    console.log(typeof Infinity); // number (special)
+
     console.log(typeof 1n); // bigint
     console.log(typeof ''); // string
     console.log(typeof false); // boolean
-    console.log(typeof null); // object. special case
+    console.log(typeof Symbol()); // symbol
+    console.log(typeof null); // object (special case)
     console.log(typeof undefined); // undefined
     // symbol
     ''')
 
-    assert r.out == 'number\nnumber\nnumber\nbigint\nstring\nboolean\nobject\nundefined'
+    assert r.out == lines([
+        'number', 'number', 'number',
+        'bigint',
+        'string',
+        'boolean',
+        'symbol',
+        'object',
+        'undefined'])
 
 def test_boolean_context__truthy_falsy(workspace):
     r = workspace.eval('''
-    console.log(Boolean(0));
-    console.log(Boolean(-1)); // false. non-zero
-    console.log(Boolean('')); // false. empty string
-    console.log(Boolean([])); // true. counter-intuitive!
-    console.log(Boolean({})); // true. counter-intuitive!
+    console.log(Boolean(0)); // false
+    console.log(Boolean(-1)); // true, non-zero
+    console.log(Boolean('')); // false, empty string
+    console.log(Boolean([])); // true, counter-intuitive!
+    console.log(Boolean({})); // true, counter-intuitive!
     ''')
 
-    assert r.out == 'false\ntrue\nfalse\ntrue\ntrue'
+    assert r.out == lines(['false', 'true', 'false', 'true', 'true'])
 
 def test_comparison__double_equals__loose_equality_with_type_coercion(workspace):
     r = workspace.eval('''
@@ -67,7 +76,12 @@ def test_comparison__double_equals__loose_equality_with_type_coercion(workspace)
     console.log(NaN == NaN); // false. NaN never equals to anything
     ''')
 
-    assert r.out == 'true\nfalse\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse\nfalse'
+    assert r.out == lines([
+        'true', 'false',
+        'true',
+        'true', 'true', 'true', 'true',
+        'true', 'true', 'false',
+        'false'])
 
 def test_comparison__triple_equals__strict_equality_no_type_coercion_simple(workspace):
     r = workspace.eval('''
@@ -87,7 +101,10 @@ def test_comparison__triple_equals__strict_equality_no_type_coercion_simple(work
     console.log(NaN === NaN); // false. NaN never equals to anything
     ''')
 
-    assert r.out == 'true\nfalse\nfalse\nfalse\nfalse\nfalse\nfalse'
+    assert r.out == lines([
+        'true', 'false',
+        'false', 'false', 'false', 'false',
+        'false'])
 
 def test_let__access_before_declaration__reference_error(workspace):
     r = workspace.eval_err('''
@@ -156,7 +173,7 @@ def test_const__cannot_reassigned_but_still_mutable(workspace):
     fruits = []; // error
     ''')
 
-    assert r.out == "[ 'apple', 'orange', 'starfruit' ]" # enclosed in []
+    assert r.out == "[ 'apple', 'orange', 'starfruit' ]"
     assert 'TypeError: Assignment to constant variable.' in r.err
 
 def test_var__not_block_scoped(workspace):
@@ -190,7 +207,7 @@ def test_undefined__when_let_var_not_initialized(workspace):
     console.log(varNotInitialized === undefined);
     ''')
 
-    assert r.out == 'true\ntrue'
+    assert r.out == lines(['true', 'true'])
 
 def test_undefined__when_return_with_no_value(workspace):
     r = workspace.eval('''
@@ -215,31 +232,31 @@ def test_undefined__when_access_nonexistent_property__no_error(workspace):
 def test_infinity__a_number_when(workspace):
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
-    console.log(typeof Infinity); // Infinity is also a number
+    console.log(typeof Infinity); // (special) number
     console.log(1 / 0 === Infinity);
     console.log(-1 / 0 === -Infinity);
     ''')
 
-    assert r.out == 'number\ntrue\ntrue'
+    assert r.out == lines(['number', 'true', 'true'])
 
 def test_nan__a_number_when_and_contagious(workspace):
     # `NaN` is contagious: if you provide it as an operand to any mathematical operation, the result will also be `NaN`.
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
     r = workspace.eval('''
-    console.log(typeof NaN);
+    console.log(typeof NaN); // (special) number
 
     const nan = parseInt('non-numeric');
     console.log(nan);
     console.log(1 + nan); // contagious
     ''')
 
-    assert r.out == 'number\nNaN\nNaN'
+    assert r.out == lines(['number', 'NaN', 'NaN'])
 
 def test_nan__never_equal_to_itself__use_isnan_instead(workspace):
     r = workspace.eval('''
-    console.log(undefined === undefined);
-    console.log(null === null);
-    console.log(Infinity === Infinity);
+    console.log(undefined === undefined); // true
+    console.log(null === null); // true
+    console.log(Infinity === Infinity); // true
 
     // `NaN` is the only value in JavaScript that's **not equal to itself**
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_overview#numbers
@@ -248,4 +265,6 @@ def test_nan__never_equal_to_itself__use_isnan_instead(workspace):
     console.log(Number.isNaN(NaN));
     ''')
 
-    assert r.out == 'true\ntrue\ntrue\nfalse\nfalse\ntrue'
+    assert r.out == lines([
+        'true', 'true', 'true',
+        'false', 'false', 'true'])
