@@ -20,7 +20,7 @@ def test_literal_and_constructor(workspace):
         \w*day\b true
     ''')
 
-def test_regexp_exec__flag_g_matters(workspace):
+def test_regexp_exec__flag_g_for_multiple_matches(workspace):
     r = workspace.eval(r'''
     //     index: 0123456789012345
     const text = 'today is my day';
@@ -46,7 +46,7 @@ def test_regexp_exec__flag_g_matters(workspace):
         [ 'today', index: 0, input: 'today is my day', groups: undefined ] 0
     ''')
 
-def test_string_match__flag_g_matters(workspace):
+def test_string_match__structure_of_returned_array_depends_flag_g(workspace):
     r = workspace.eval(r'''
     const text = 'today is my day';
 
