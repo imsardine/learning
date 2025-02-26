@@ -67,3 +67,34 @@ def test_transpilation(workspace):
     }
     console.log(new Person('World').greet());
     ''')
+
+def test_tsconfig_project(workspace):
+    workspace.src('src/hello.ts', '''
+    console.log("Hello TypeScript (TS)!");
+    ''')
+
+    workspace.src('tsconfig.json', '''
+    {
+      "compilerOptions": {
+        "strict": true,
+        "outDir": "dist"
+      }
+    }
+    ''')
+
+    workspace.run('tsc')
+    assert workspace.run('tree').out == lines('''
+    .
+    ├── dist
+    │\xa0\xa0 └── hello.js
+    ├── src
+    │\xa0\xa0 └── hello.ts
+    └── tsconfig.json
+
+    3 directories, 3 files
+    ''')
+
+    assert workspace.read_txt('dist/hello.js', 'utf-8') == lines('''
+    "use strict";
+    console.log("Hello TypeScript (TS)!");
+    ''')

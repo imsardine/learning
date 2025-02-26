@@ -5,6 +5,7 @@ ENV PATH $PATH:/root/.local/bin
 
 COPY tox.ini ./
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        tree \
         vim \
         python3 \
         pipx \
